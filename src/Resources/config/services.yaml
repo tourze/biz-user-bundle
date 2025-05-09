@@ -6,3 +6,5 @@ services:
 
   BizUserBundle\Repository\:
     resource: '../../Repository/'
+  BizUserBundle\Service\:
+    resource: '../../Service/'
