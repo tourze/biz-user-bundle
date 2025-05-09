@@ -8,6 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -27,6 +28,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @method BizUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 #[Autoconfigure(public: true)]
+#[AsAlias(id: UserLoaderInterface::class)]
 class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -36,10 +38,21 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
 
     public function loadUserByIdentifier(string $identifier): ?UserInterface
     {
-        return $this->findOneBy([
-            'username' => $identifier,
-            'valid' => true,
-        ]);
+        $user = null;
+        if (is_numeric($identifier)) {
+            $user = $this->findOneBy([
+                'id' => $identifier,
+                'valid' => true,
+            ]);
+        }
+        if ($user === null) {
+            $user = $this->findOneBy([
+                'username' => $identifier,
+                'valid' => true,
+            ]);
+        }
+
+        return $user;
     }
 
     /**
