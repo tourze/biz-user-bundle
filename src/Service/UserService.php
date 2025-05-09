@@ -151,7 +151,7 @@ class UserService
      */
     public function checkNewPasswordStrength(BizUser $user, #[\SensitiveParameter] string $plainPassword): void
     {
-        if (mb_strlen($plainPassword) < 8) {
+        if (strlen($plainPassword) < 8) {
             throw new PasswordWeakStrengthException('密码长度至少 8 位');
         }
 
