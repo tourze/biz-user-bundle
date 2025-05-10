@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
@@ -24,7 +25,7 @@ class UserService
     public function __construct(
         private readonly BizUserRepository $userRepository,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly PropertyAccessor $propertyAccessor,
+        #[Autowire(service: 'biz-user.property-accessor')] private readonly PropertyAccessor $propertyAccessor,
         private readonly PasswordHasherFactoryInterface $hasherFactory,
         private readonly PasswordHistoryRepository $historyRepository,
         private readonly LoggerInterface $logger,
