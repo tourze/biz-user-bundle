@@ -6,8 +6,10 @@
   "require": {
     "php": "^8.1",
     "doctrine/collections": "^2.3",
+    "doctrine/data-fixtures": "^2.0",
     "doctrine/dbal": "^4.0",
     "doctrine/doctrine-bundle": "^2.13",
+    "doctrine/doctrine-fixtures-bundle": "^4.0",
     "doctrine/orm": "^3.0",
     "doctrine/persistence": "^3.1 || ^4",
     "psr/log": "^3|^2|^1",
@@ -27,6 +29,7 @@
     "tourze/arrayable": "0.0.*",
     "tourze/doctrine-indexed-bundle": "0.0.*",
     "tourze/doctrine-ip-bundle": "0.0.*",
+    "tourze/doctrine-resolve-target-entity-bundle": "0.0.*",
     "tourze/doctrine-snowflake-bundle": "0.1.*",
     "tourze/doctrine-timestamp-bundle": "0.0.*",
     "tourze/doctrine-track-bundle": "0.1.*",
