@@ -107,7 +107,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         // 创建普通用户
         for ($i = 1; $i <= 20; $i++) {
             $randomDays = rand(1, 20);
-            $createdAt = Carbon::now()->modify('-' . $randomDays . ' days');
+            $createTime = Carbon::now()->modify('-' . $randomDays . ' days');
 
             $user = new BizUser();
             $user->setUsername('user' . $i);
@@ -117,8 +117,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
             $user->setMobile('138' . str_pad((string)$i, 8, '0', STR_PAD_LEFT));
             $user->setPasswordHash($this->passwordHasher->hashPassword($user, self::DEFAULT_PASSWORD));
             $user->setValid(true);
-            $user->setCreateTime($createdAt);
-            $user->setUpdateTime($createdAt);
+            $user->setCreateTime($createTime);
+            $user->setUpdateTime($createTime);
 
             $manager->persist($user);
             $this->addReference(self::NORMAL_USER_REFERENCE_PREFIX . $i, $user);
