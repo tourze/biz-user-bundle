@@ -122,6 +122,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
 
             $manager->persist($user);
             $this->addReference(self::NORMAL_USER_REFERENCE_PREFIX . $i, $user);
+            $this->addReference("user-{$i}", $user);
         }
 
         $manager->flush();
