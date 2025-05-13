@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace BizUserBundle\DataFixtures;
 
 use BizUserBundle\Entity\BizRole;
+use Carbon\Carbon;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 
 /**
  * 角色数据填充
- * 
+ *
  * 创建系统中各种预定义角色，包含不同权限组合
  */
 class BizRoleFixtures extends Fixture implements FixtureGroupInterface
@@ -23,7 +24,7 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
     public const CONTENT_MANAGER_ROLE_REFERENCE = 'content-manager-role';
     public const REPORT_VIEWER_ROLE_REFERENCE = 'report-viewer-role';
     public const ANALYST_ROLE_REFERENCE = 'analyst-role';
-    
+
     // 角色名称常量
     private const ROLE_ADMIN = 'ROLE_ADMIN';
     private const ROLE_MODERATOR = 'ROLE_MODERATOR';
@@ -34,8 +35,6 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
 
     public function load(ObjectManager $manager): void
     {
-        $now = new \DateTimeImmutable();
-        
         // 创建管理员角色
         $adminRole = new BizRole();
         $adminRole->setName(self::ROLE_ADMIN);
@@ -43,11 +42,11 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $adminRole->setAdmin(true);
         $adminRole->setValid(true);
         $adminRole->setPermissions(['admin', 'user_manage', 'role_manage', 'content_manage', 'system_config']);
-        $adminRole->setCreateTime($now->modify('-60 days'));
-        $adminRole->setUpdateTime($now->modify('-30 days'));
+        $adminRole->setCreateTime(Carbon::now()->modify('-60 days'));
+        $adminRole->setUpdateTime(Carbon::now()->modify('-30 days'));
         $manager->persist($adminRole);
         $this->addReference(self::ADMIN_ROLE_REFERENCE, $adminRole);
-        
+
         // 创建内容审核员角色
         $moderatorRole = new BizRole();
         $moderatorRole->setName(self::ROLE_MODERATOR);
@@ -55,11 +54,11 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $moderatorRole->setAdmin(false);
         $moderatorRole->setValid(true);
         $moderatorRole->setPermissions(['content_audit', 'report_view', 'keyword_manage']);
-        $moderatorRole->setCreateTime($now->modify('-55 days'));
-        $moderatorRole->setUpdateTime($now->modify('-25 days'));
+        $moderatorRole->setCreateTime(Carbon::now()->modify('-55 days'));
+        $moderatorRole->setUpdateTime(Carbon::now()->modify('-25 days'));
         $manager->persist($moderatorRole);
         $this->addReference(self::MODERATOR_ROLE_REFERENCE, $moderatorRole);
-        
+
         // 创建普通用户角色
         $userRole = new BizRole();
         $userRole->setName(self::ROLE_USER);
@@ -67,11 +66,11 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $userRole->setAdmin(false);
         $userRole->setValid(true);
         $userRole->setPermissions(['profile_view', 'content_create']);
-        $userRole->setCreateTime($now->modify('-50 days'));
-        $userRole->setUpdateTime($now->modify('-20 days'));
+        $userRole->setCreateTime(Carbon::now()->modify('-50 days'));
+        $userRole->setUpdateTime(Carbon::now()->modify('-20 days'));
         $manager->persist($userRole);
         $this->addReference(self::USER_ROLE_REFERENCE, $userRole);
-        
+
         // 创建内容管理员角色
         $contentManagerRole = new BizRole();
         $contentManagerRole->setName(self::ROLE_CONTENT_MANAGER);
@@ -79,11 +78,11 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $contentManagerRole->setAdmin(false);
         $contentManagerRole->setValid(true);
         $contentManagerRole->setPermissions(['content_manage', 'content_delete', 'content_edit']);
-        $contentManagerRole->setCreateTime($now->modify('-45 days'));
-        $contentManagerRole->setUpdateTime($now->modify('-15 days'));
+        $contentManagerRole->setCreateTime(Carbon::now()->modify('-45 days'));
+        $contentManagerRole->setUpdateTime(Carbon::now()->modify('-15 days'));
         $manager->persist($contentManagerRole);
         $this->addReference(self::CONTENT_MANAGER_ROLE_REFERENCE, $contentManagerRole);
-        
+
         // 创建报告查看者角色
         $reportViewerRole = new BizRole();
         $reportViewerRole->setName(self::ROLE_REPORT_VIEWER);
@@ -91,11 +90,11 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $reportViewerRole->setAdmin(false);
         $reportViewerRole->setValid(true);
         $reportViewerRole->setPermissions(['report_view', 'statistics_view']);
-        $reportViewerRole->setCreateTime($now->modify('-40 days'));
-        $reportViewerRole->setUpdateTime($now->modify('-10 days'));
+        $reportViewerRole->setCreateTime(Carbon::now()->modify('-40 days'));
+        $reportViewerRole->setUpdateTime(Carbon::now()->modify('-10 days'));
         $manager->persist($reportViewerRole);
         $this->addReference(self::REPORT_VIEWER_ROLE_REFERENCE, $reportViewerRole);
-        
+
         // 创建数据分析师角色
         $analystRole = new BizRole();
         $analystRole->setName(self::ROLE_ANALYST);
@@ -103,11 +102,11 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $analystRole->setAdmin(false);
         $analystRole->setValid(true);
         $analystRole->setPermissions(['report_view', 'statistics_view', 'data_export', 'data_analysis']);
-        $analystRole->setCreateTime($now->modify('-35 days'));
-        $analystRole->setUpdateTime($now->modify('-5 days'));
+        $analystRole->setCreateTime(Carbon::now()->modify('-35 days'));
+        $analystRole->setUpdateTime(Carbon::now()->modify('-5 days'));
         $manager->persist($analystRole);
         $this->addReference(self::ANALYST_ROLE_REFERENCE, $analystRole);
-        
+
         $manager->flush();
     }
 

@@ -10,6 +10,9 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -29,11 +32,24 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 #[Autoconfigure(public: true)]
 #[AsAlias(id: UserLoaderInterface::class)]
-class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface
+class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, BizUser::class);
+    }
+
+    /**
+     * 用于自动密码升级
+     */
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+    {
+        if (!$user instanceof BizUser) {
+            throw new UnsupportedUserException(sprintf('用户类 %s 不支持。', get_class($user)));
+        }
+
+        $user->setPasswordHash($newHashedPassword);
+        $this->getEntityManager()->flush();
     }
 
     public function loadUserByIdentifier(string $identifier): ?UserInterface

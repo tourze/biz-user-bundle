@@ -6,6 +6,7 @@ namespace BizUserBundle\DataFixtures;
 
 use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\BizUser;
+use Carbon\Carbon;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -22,20 +23,20 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
     public const ADMIN_USER_REFERENCE = 'admin-user';
     public const MODERATOR_USER_REFERENCE = 'moderator-user';
     public const NORMAL_USER_REFERENCE_PREFIX = 'normal-user-';
-    
+
     // 密码默认值
-    private const DEFAULT_PASSWORD = 'password123';
+    private const DEFAULT_PASSWORD = '1234qwqw';
 
     public function __construct(
-        private readonly UserPasswordHasherInterface $passwordHasher
-    ) {
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    )
+    {
     }
 
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('zh_CN');
-        $now = new \DateTimeImmutable();
-        
+
         // 创建管理员用户
         $adminUser = new BizUser();
         $adminUser->setUsername('admin');
@@ -45,12 +46,12 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $adminUser->setMobile('13800000001');
         $adminUser->setPasswordHash($this->passwordHasher->hashPassword($adminUser, self::DEFAULT_PASSWORD));
         $adminUser->setValid(true);
-        $adminUser->setCreateTime($now->modify('-30 days'));
-        $adminUser->setUpdateTime($now->modify('-30 days'));
-        
+        $adminUser->setCreateTime(Carbon::now()->modify('-30 days'));
+        $adminUser->setUpdateTime(Carbon::now()->modify('-30 days'));
+
         $manager->persist($adminUser);
         $this->addReference(self::ADMIN_USER_REFERENCE, $adminUser);
-        
+
         // 创建内容审核员用户
         $moderatorUser = new BizUser();
         $moderatorUser->setUsername('moderator');
@@ -60,12 +61,12 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $moderatorUser->setMobile('13800000002');
         $moderatorUser->setPasswordHash($this->passwordHasher->hashPassword($moderatorUser, self::DEFAULT_PASSWORD));
         $moderatorUser->setValid(true);
-        $moderatorUser->setCreateTime($now->modify('-25 days'));
-        $moderatorUser->setUpdateTime($now->modify('-25 days'));
-        
+        $moderatorUser->setCreateTime(Carbon::now()->modify('-25 days'));
+        $moderatorUser->setUpdateTime(Carbon::now()->modify('-25 days'));
+
         $manager->persist($moderatorUser);
         $this->addReference(self::MODERATOR_USER_REFERENCE, $moderatorUser);
-        
+
         // 创建一些特殊角色的用户
         $contentManagerUser = new BizUser();
         $contentManagerUser->setUsername('content_manager');
@@ -75,10 +76,10 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $contentManagerUser->setMobile('13800000003');
         $contentManagerUser->setPasswordHash($this->passwordHasher->hashPassword($contentManagerUser, self::DEFAULT_PASSWORD));
         $contentManagerUser->setValid(true);
-        $contentManagerUser->setCreateTime($now->modify('-24 days'));
-        $contentManagerUser->setUpdateTime($now->modify('-24 days'));
+        $contentManagerUser->setCreateTime(Carbon::now()->modify('-24 days'));
+        $contentManagerUser->setUpdateTime(Carbon::now()->modify('-24 days'));
         $manager->persist($contentManagerUser);
-        
+
         $reportViewerUser = new BizUser();
         $reportViewerUser->setUsername('report_viewer');
         $reportViewerUser->setEmail('report_viewer@example.com');
@@ -87,10 +88,10 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $reportViewerUser->setMobile('13800000004');
         $reportViewerUser->setPasswordHash($this->passwordHasher->hashPassword($reportViewerUser, self::DEFAULT_PASSWORD));
         $reportViewerUser->setValid(true);
-        $reportViewerUser->setCreateTime($now->modify('-23 days'));
-        $reportViewerUser->setUpdateTime($now->modify('-23 days'));
+        $reportViewerUser->setCreateTime(Carbon::now()->modify('-23 days'));
+        $reportViewerUser->setUpdateTime(Carbon::now()->modify('-23 days'));
         $manager->persist($reportViewerUser);
-        
+
         $analystUser = new BizUser();
         $analystUser->setUsername('analyst');
         $analystUser->setEmail('analyst@example.com');
@@ -99,30 +100,30 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $analystUser->setMobile('13800000005');
         $analystUser->setPasswordHash($this->passwordHasher->hashPassword($analystUser, self::DEFAULT_PASSWORD));
         $analystUser->setValid(true);
-        $analystUser->setCreateTime($now->modify('-22 days'));
-        $analystUser->setUpdateTime($now->modify('-22 days'));
+        $analystUser->setCreateTime(Carbon::now()->modify('-22 days'));
+        $analystUser->setUpdateTime(Carbon::now()->modify('-22 days'));
         $manager->persist($analystUser);
-        
+
         // 创建普通用户
         for ($i = 1; $i <= 20; $i++) {
             $randomDays = rand(1, 20);
-            $createdAt = $now->modify('-' . $randomDays . ' days');
-            
+            $createdAt = Carbon::now()->modify('-' . $randomDays . ' days');
+
             $user = new BizUser();
             $user->setUsername('user' . $i);
             $user->setEmail('user' . $i . '@example.com');
             $user->addAssignRole($this->getReference(BizRoleFixtures::USER_ROLE_REFERENCE, BizRole::class));
-            $user->setNickName($faker->name);
+            $user->setNickName($faker->name());
             $user->setMobile('138' . str_pad((string)$i, 8, '0', STR_PAD_LEFT));
             $user->setPasswordHash($this->passwordHasher->hashPassword($user, self::DEFAULT_PASSWORD));
             $user->setValid(true);
             $user->setCreateTime($createdAt);
             $user->setUpdateTime($createdAt);
-            
+
             $manager->persist($user);
             $this->addReference(self::NORMAL_USER_REFERENCE_PREFIX . $i, $user);
         }
-        
+
         $manager->flush();
     }
 
