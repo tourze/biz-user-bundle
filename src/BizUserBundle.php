@@ -27,6 +27,8 @@ class BizUserBundle extends Bundle implements BundleDependencyInterface
     {
         return [
             \Tourze\DoctrineResolveTargetEntityBundle\DoctrineResolveTargetEntityBundle::class => ['all' => true],
+            \Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle::class => ['all' => true],
+            \Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle::class => ['all' => true],
         ];
     }
 }
