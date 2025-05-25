@@ -60,10 +60,6 @@ class BizUserTest extends TestCase
         $this->user->setValid(true);
         $this->assertTrue($this->user->isValid());
 
-        // 测试真实姓名
-        $this->user->setRealname('Real Name');
-        $this->assertEquals('Real Name', $this->user->getRealname());
-
         // 测试手机号码
         $this->user->setMobile('13800138000');
         $this->assertEquals('13800138000', $this->user->getMobile());

@@ -106,10 +106,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '昵称'])]
     private ?string $nickName = '';
 
-    #[TrackColumn]
-    #[ORM\Column(length: 50, nullable: true, options: ['comment' => '真实姓名'])]
-    private ?string $realname = null;
-
     #[FormField(span: 12)]
     #[Assert\Email]
     #[ORM\Column(type: Types::STRING, length: 500, nullable: true, options: ['comment' => '邮箱地址'])]
@@ -547,18 +543,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this;
     }
 
-    public function getRealname(): ?string
-    {
-        return $this->realname;
-    }
-
-    public function setRealname(?string $realname): self
-    {
-        $this->realname = $realname;
-
-        return $this;
-    }
-
     public function retrieveAdminArray(): array
     {
         $result = [
@@ -580,7 +564,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
             'username' => $this->getUsername(),
             'identity' => $this->getIdentity(),
             'nickName' => $this->getNickName(),
-            'realName' => $this->getRealname(),
             'email' => $this->getEmail(),
             'mobile' => $this->getMobile(),
             'valid' => $this->isValid(),
