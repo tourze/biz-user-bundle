@@ -31,7 +31,7 @@ class BizUserRepositoryTest extends TestCase
             ->setConstructorArgs([$this->registry])
             ->onlyMethods(['getEntityManager'])
             ->getMock();
-            
+
         $this->repository->method('getEntityManager')
             ->willReturn($this->entityManager);
     }
@@ -52,10 +52,10 @@ class BizUserRepositoryTest extends TestCase
             ->setConstructorArgs([$this->registry])
             ->onlyMethods(['findOneBy', 'getEntityManager'])
             ->getMock();
-            
+
         $this->repository->method('getEntityManager')
             ->willReturn($this->entityManager);
-            
+
         $this->repository->expects($this->once())
             ->method('findOneBy')
             ->with(['id' => '123', 'valid' => true])
@@ -83,10 +83,10 @@ class BizUserRepositoryTest extends TestCase
             ->setConstructorArgs([$this->registry])
             ->onlyMethods(['loadUserByIdentifier', 'getEntityManager'])
             ->getMock();
-            
+
         $repository->method('getEntityManager')
             ->willReturn($this->entityManager);
-            
+
         $repository->expects($this->once())
             ->method('loadUserByIdentifier')
             ->with('test_user')
@@ -109,10 +109,10 @@ class BizUserRepositoryTest extends TestCase
             ->setConstructorArgs([$this->registry])
             ->onlyMethods(['loadUserByIdentifier', 'getEntityManager'])
             ->getMock();
-            
+
         $repository->method('getEntityManager')
             ->willReturn($this->entityManager);
-            
+
         $repository->expects($this->once())
             ->method('loadUserByIdentifier')
             ->with('non_existing')
@@ -193,7 +193,7 @@ class BizUserRepositoryTest extends TestCase
             ->setConstructorArgs([$this->registry])
             ->onlyMethods(['getEntityManager'])
             ->getMock();
-            
+
         $repository->expects($this->once())
             ->method('getEntityManager')
             ->willReturn($this->entityManager);
@@ -204,4 +204,4 @@ class BizUserRepositoryTest extends TestCase
         $this->assertInstanceOf(EntityManagerInterface::class, $result);
         $this->assertSame($this->entityManager, $result);
     }
-} 
+}

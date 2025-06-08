@@ -7,7 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -40,7 +40,7 @@ class BizUserCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield TextField::new('fullName', '姓名');
+        yield TextField::new('nickName', '昵称');
         yield TextField::new('username', '用户名');
         yield EmailField::new('email', '邮箱');
 
@@ -58,13 +58,8 @@ class BizUserCrudController extends AbstractCrudController
                 ->setHelp('留空表示不修改密码');
         }
 
-        yield ChoiceField::new('roles', '角色')
-            ->setChoices([
-                '管理员' => 'ROLE_ADMIN',
-                '普通用户' => 'ROLE_USER'
-            ])
-            ->allowMultipleChoices()
-            ->renderExpanded();
+        yield AssociationField::new('assignRoles', '分配角色')
+            ->setRequired(false);
     }
 
     public function configureActions(Actions $actions): Actions
@@ -111,7 +106,7 @@ class BizUserCrudController extends AbstractCrudController
         // 检查是否有明文密码需要加密
         if ($user->getPlainPassword()) {
             $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
-            $user->setPassword($hashedPassword);
+            $user->setPasswordHash($hashedPassword);
             $user->eraseCredentials(); // 清除明文密码
         }
     }

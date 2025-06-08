@@ -14,8 +14,8 @@ class PasswordWeakStrengthExceptionTest extends TestCase
     {
         $message = '密码不符合安全要求';
         $exception = new PasswordWeakStrengthException($message);
-        
+
         $this->assertEquals($message, $exception->getMessage());
         $this->assertInstanceOf(\Exception::class, $exception);
     }
-} 
+}

@@ -121,6 +121,11 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     private ?string $passwordHash = null;
 
     /**
+     * 临时存储明文密码，用于表单处理，不持久化到数据库
+     */
+    private ?string $plainPassword = null;
+
+    /**
      * @var Collection<BizRole>
      */
     #[Filterable(label: '分配角色')]
@@ -304,6 +309,17 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         $this->passwordHash = $passwordHash;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
     public function getRoles(): array
     {
         $roles = [];
@@ -338,8 +354,8 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     public function eraseCredentials(): void
     {
-        // if you had a plainPassword property, you'd nullify it here
-        // $this->plainPassword = null;
+        // 清除明文密码
+        $this->plainPassword = null;
     }
 
     /**

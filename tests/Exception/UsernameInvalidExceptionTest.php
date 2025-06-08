@@ -14,8 +14,8 @@ class UsernameInvalidExceptionTest extends TestCase
     {
         $message = '用户名不合法';
         $exception = new UsernameInvalidException($message);
-        
+
         $this->assertEquals($message, $exception->getMessage());
         $this->assertInstanceOf(\Exception::class, $exception);
     }
-} 
+}
