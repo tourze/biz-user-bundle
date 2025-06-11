@@ -158,7 +158,7 @@ class BizUserRepositoryTest extends TestCase
             // 执行测试
             $repository->checkUserLegal($user);
             $this->assertTrue(true); // 如果没有异常，测试通过
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->fail('方法抛出了意外的异常: ' . $e->getMessage());
         }
     }
