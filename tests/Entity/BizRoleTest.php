@@ -265,8 +265,6 @@ class BizRoleTest extends TestCase
         $this->role->setPermissions($permissions);
 
         $result = $this->role->renderPermissionList();
-
-        $this->assertIsArray($result);
         $this->assertCount(3, $result);
 
         foreach ($result as $index => $item) {
@@ -307,8 +305,6 @@ class BizRoleTest extends TestCase
         $this->role->setUpdateTime($now);
 
         $result = $this->role->retrievePlainArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('name', $result);
         $this->assertArrayHasKey('title', $result);
@@ -343,8 +339,6 @@ class BizRoleTest extends TestCase
         $this->role->setPermissions(['user_manage', 'role_manage']);
 
         $result = $this->role->retrieveAdminArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('name', $result);
         $this->assertArrayHasKey('title', $result);

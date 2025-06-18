@@ -135,7 +135,6 @@ class BizUserRepositoryTest extends TestCase
         $result = $repository->getReservedUserNames();
 
         // 断言结果是数组且包含预期的保留用户名
-        $this->assertIsArray($result);
         $this->assertContains('admin', $result);
         $this->assertContains('root', $result);
         $this->assertContains('system', $result);

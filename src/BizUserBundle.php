@@ -23,6 +23,9 @@ class BizUserBundle extends Bundle implements BundleDependencyInterface
         );
     }
 
+    /**
+     * @return array<class-string<Bundle>, array<string, bool>>
+     */
     public static function getBundleDependencies(): array
     {
         return [

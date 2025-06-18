@@ -76,6 +76,9 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '是否系统管理员'])]
     private ?bool $admin = false;
 
+    /**
+     * @var array<string>
+     */
     #[TrackColumn]
     #[FormField(span: 24)]
     #[CopyColumn]
@@ -83,7 +86,7 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     private array $permissions = [];
 
     /**
-     * @var Collection<BizUser>
+     * @var Collection<int, BizUser>
      */
     #[Ignore]
     #[ORM\ManyToMany(targetEntity: BizUser::class, mappedBy: 'assignRoles', fetch: 'EXTRA_LAZY')]
@@ -100,17 +103,26 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '自定义菜单JSON'])]
     private ?string $menuJson = '';
 
+    /**
+     * @var array<string>|null
+     */
     #[FormField(span: 24)]
     #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '要排除的权限'])]
     private ?array $excludePermissions = [];
 
+    /**
+     * @var array<string>|null
+     */
     #[ListColumn]
     #[FormField]
     #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '继承角色'])]
     private ?array $hierarchicalRoles = ['ROLE_OPERATOR'];
 
+    /**
+     * @var Collection<int, RoleEntityPermission>
+     */
     #[Ignore]
     #[CurdAction(label: '数据权限')]
     #[ORM\OneToMany(targetEntity: RoleEntityPermission::class, mappedBy: 'role')]
@@ -145,13 +157,19 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ListColumn(order: 98, sorter: true)]
     #[ExportColumn]
     #[CreateTimeColumn]
-    #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
+    #[Groups(['restful_read', 'admin_curd'])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
+    private ?\DateTime $createdAt = null;
+
+    #[UpdateTimeColumn]
     #[ListColumn(order: 99, sorter: true)]
-    #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
+    #[Groups(['restful_read', 'admin_curd'])]
     #[Filterable]
-    #[ExportColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]public function __construct()
+    #[ExportColumn]  
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]
+    private ?\DateTime $updatedAt = null;
+
+    public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->dataPermissions = new ArrayCollection();
@@ -159,7 +177,7 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null || $this->getId() === 0) {
             return '';
         }
 
@@ -197,7 +215,7 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 
     public function getName(): string
     {
-        return $this->name;
+        return $this->name ?? '';
     }
 
     public function setName(string $name): self
@@ -209,7 +227,7 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 
     public function getTitle(): string
     {
-        return $this->title;
+        return $this->title ?? '';
     }
 
     public function setTitle(string $title): self
@@ -219,14 +237,20 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $this;
     }
 
-    public function getPermissions(): ?array
+    /**
+     * @return array<string>
+     */
+    public function getPermissions(): array
     {
         return $this->permissions;
     }
 
+    /**
+     * @param array<string>|null $permissions
+     */
     public function setPermissions(?array $permissions): self
     {
-        $this->permissions = $permissions;
+        $this->permissions = $permissions ?? [];
 
         return $this;
     }
@@ -294,23 +318,32 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $this;
     }
 
-    public function getExcludePermissions(): ?array
+    /**
+     * @return array<string>
+     */
+    public function getExcludePermissions(): array
     {
         return $this->excludePermissions;
     }
 
+    /**
+     * @param array<string>|null $excludePermissions
+     */
     public function setExcludePermissions(?array $excludePermissions): self
     {
-        $this->excludePermissions = $excludePermissions;
+        $this->excludePermissions = $excludePermissions ?? [];
 
         return $this;
     }
 
     #[ListColumn(order: 3, title: '拥有权限')]
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function renderPermissionList(): array
     {
         $res = [];
-        foreach ($this->getPermissions() as $permission) {
+        foreach ($this->getPermissions() ?? [] as $permission) {
             $res[] = [
                 'text' => $permission,
                 'fontStyle' => ['fontSize' => '12px'],
@@ -320,15 +353,21 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $res;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getHierarchicalRoles(): array
     {
-        if (!$this->hierarchicalRoles) {
+        if ($this->hierarchicalRoles === null || $this->hierarchicalRoles === []) {
             return [];
         }
 
         return $this->hierarchicalRoles;
     }
 
+    /**
+     * @param array<string>|null $hierarchicalRoles
+     */
     public function setHierarchicalRoles(?array $hierarchicalRoles): self
     {
         $this->hierarchicalRoles = $hierarchicalRoles;
@@ -388,6 +427,9 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrievePlainArray(): array
     {
         return [
@@ -396,11 +438,14 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
             'title' => $this->getTitle(),
             'valid' => $this->isValid(),
             'hierarchicalRoles' => $this->getHierarchicalRoles(),
-            'createTime' => $this->getCreateTime()?->format('Y-m-d H:i:s'),
-            'updateTime' => $this->getUpdateTime()?->format('Y-m-d H:i:s'),
+            'createTime' => $this->createdAt?->format('Y-m-d H:i:s'),
+            'updateTime' => $this->updatedAt?->format('Y-m-d H:i:s'),
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrieveAdminArray(): array
     {
         return [

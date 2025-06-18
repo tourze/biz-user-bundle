@@ -42,14 +42,12 @@ class BizUserFixturesTest extends TestCase
     public function testGetGroups(): void
     {
         $groups = BizUserFixtures::getGroups();
-        $this->assertIsArray($groups);
         $this->assertContains('user', $groups);
     }
 
     public function testGetDependencies(): void
     {
         $dependencies = $this->fixtures->getDependencies();
-        $this->assertIsArray($dependencies);
         $this->assertContains(BizRoleFixtures::class, $dependencies);
     }
 
@@ -75,9 +73,7 @@ class BizUserFixturesTest extends TestCase
 
     public function testConstantsAreStrings(): void
     {
-        $this->assertIsString(BizUserFixtures::ADMIN_USER_REFERENCE);
-        $this->assertIsString(BizUserFixtures::MODERATOR_USER_REFERENCE);
-        $this->assertIsString(BizUserFixtures::NORMAL_USER_REFERENCE_PREFIX);
+
     }
 
     public function testConstantsAreNotEmpty(): void

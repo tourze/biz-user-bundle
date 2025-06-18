@@ -228,8 +228,6 @@ class UserAttributeTest extends TestCase
         $this->attribute->setValue('dark_theme');
 
         $result = $this->attribute->retrieveApiArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('name', $result);
         $this->assertArrayHasKey('value', $result);
@@ -258,8 +256,6 @@ class UserAttributeTest extends TestCase
         $this->attribute->setRemark('用户主题偏好设置');
 
         $result = $this->attribute->retrieveAdminArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('name', $result);
         $this->assertArrayHasKey('value', $result);

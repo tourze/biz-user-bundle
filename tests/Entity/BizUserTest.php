@@ -120,7 +120,6 @@ class BizUserTest extends TestCase
     {
         // 测试没有角色时返回 ROLE_USER
         $roles = $this->user->getRoles();
-        $this->assertIsArray($roles);
         $this->assertContains('ROLE_USER', $roles);
 
         // 由于 BizRole::getValue 方法可能不存在，直接添加具有角色的用户模拟对象
@@ -176,8 +175,6 @@ class BizUserTest extends TestCase
         $this->user->setNickName('Test User');
 
         $result = $this->user->toSelectItem();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('value', $result);
         $this->assertArrayHasKey('label', $result);
         $this->assertEquals(123, $result['value']);
@@ -290,8 +287,6 @@ class BizUserTest extends TestCase
         $this->user->setPasswordHash('password_hash');
 
         $serialized = $this->user->__serialize();
-
-        $this->assertIsArray($serialized);
         $this->assertArrayHasKey(0, $serialized);
         $this->assertArrayHasKey(1, $serialized);
         $this->assertArrayHasKey(2, $serialized);
@@ -329,8 +324,6 @@ class BizUserTest extends TestCase
         $this->user->setValid(true);
 
         $result = $this->user->retrieveAdminArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('username', $result);
         $this->assertArrayHasKey('nickName', $result);
@@ -351,8 +344,6 @@ class BizUserTest extends TestCase
         $this->user->setNickName('Test User');
 
         $result = $this->user->retrievePlainArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('username', $result);
         $this->assertArrayHasKey('nickName', $result);
@@ -372,8 +363,6 @@ class BizUserTest extends TestCase
         $this->user->setAvatar('avatar.jpg');
 
         $result = $this->user->retrieveApiArray();
-
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('username', $result);
         $this->assertArrayHasKey('nickName', $result);

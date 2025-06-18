@@ -40,10 +40,8 @@ class RoleEntityPermissionRepositoryTest extends TestCase
 
     public function testBasicRepositoryMethods(): void
     {
-        $this->assertTrue(method_exists($this->repository, 'find'));
-        $this->assertTrue(method_exists($this->repository, 'findOneBy'));
-        $this->assertTrue(method_exists($this->repository, 'findAll'));
-        $this->assertTrue(method_exists($this->repository, 'findBy'));
+        // These methods are guaranteed to exist in Doctrine repositories
+        $this->assertInstanceOf(ServiceEntityRepository::class, $this->repository);
     }
 
     public function testRepositoryCanHandleRoleEntityPermissionEntity(): void
@@ -75,26 +73,17 @@ class RoleEntityPermissionRepositoryTest extends TestCase
 
     public function testRepositoryMethodsWithEntityTypes(): void
     {
-        $methods = ['find', 'findOneBy', 'findAll', 'findBy'];
-
-        foreach ($methods as $methodName) {
-            $this->assertTrue(
-                method_exists($this->repository, $methodName),
-                sprintf('方法 %s 应该存在', $methodName)
-            );
-        }
+        // Repository methods are guaranteed to exist via ServiceEntityRepository inheritance
+        $this->assertInstanceOf(ServiceEntityRepository::class, $this->repository);
     }
 
     public function testRoleEntityPermissionEntityHasExpectedMethods(): void
     {
         $permission = new RoleEntityPermission();
-
-        $this->assertTrue(method_exists($permission, 'setStatement'));
-        $this->assertTrue(method_exists($permission, 'getStatement'));
-        $this->assertTrue(method_exists($permission, 'setRole'));
-        $this->assertTrue(method_exists($permission, 'getRole'));
-        $this->assertTrue(method_exists($permission, 'setEntityClass'));
-        $this->assertTrue(method_exists($permission, 'getEntityClass'));
+        
+        // Test functionality instead of method existence
+        $permission->setStatement('test statement');
+        $this->assertEquals('test statement', $permission->getStatement());
     }
 
     public function testRoleEntityPermissionStringRepresentation(): void
@@ -108,40 +97,36 @@ class RoleEntityPermissionRepositoryTest extends TestCase
     public function testRoleEntityPermissionTimestamps(): void
     {
         $permission = new RoleEntityPermission();
-
-        $this->assertTrue(method_exists($permission, 'setCreateTime'));
-        $this->assertTrue(method_exists($permission, 'getCreateTime'));
-        $this->assertTrue(method_exists($permission, 'setUpdateTime'));
-        $this->assertTrue(method_exists($permission, 'getUpdateTime'));
+        $now = new \DateTime();
+        
+        // Test functionality instead of method existence
+        $permission->setCreateTime($now);
+        $this->assertEquals($now, $permission->getCreateTime());
     }
 
     public function testRoleEntityPermissionValidation(): void
     {
         $permission = new RoleEntityPermission();
 
-        $this->assertTrue(method_exists($permission, 'setValid'));
-        $this->assertTrue(method_exists($permission, 'isValid'));
-
         $permission->setValid(true);
         $this->assertTrue($permission->isValid());
+        
+        $permission->setValid(false);
+        $this->assertFalse($permission->isValid());
     }
 
     public function testRoleEntityPermissionUserTracking(): void
     {
         $permission = new RoleEntityPermission();
-
-        $this->assertTrue(method_exists($permission, 'setCreatedBy'));
-        $this->assertTrue(method_exists($permission, 'getCreatedBy'));
-        $this->assertTrue(method_exists($permission, 'setUpdatedBy'));
-        $this->assertTrue(method_exists($permission, 'getUpdatedBy'));
+        
+        // Test functionality instead of method existence
+        $permission->setCreatedBy('test_user');
+        $this->assertEquals('test_user', $permission->getCreatedBy());
     }
 
     public function testRoleEntityPermissionRemark(): void
     {
         $permission = new RoleEntityPermission();
-
-        $this->assertTrue(method_exists($permission, 'setRemark'));
-        $this->assertTrue(method_exists($permission, 'getRemark'));
 
         $permission->setRemark('测试备注');
         $this->assertEquals('测试备注', $permission->getRemark());

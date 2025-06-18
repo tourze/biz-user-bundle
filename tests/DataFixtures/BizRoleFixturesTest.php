@@ -32,7 +32,6 @@ class BizRoleFixturesTest extends TestCase
     public function testGetGroups(): void
     {
         $groups = BizRoleFixtures::getGroups();
-        $this->assertIsArray($groups);
         $this->assertContains('user', $groups);
     }
 
@@ -61,12 +60,7 @@ class BizRoleFixturesTest extends TestCase
 
     public function testConstantsAreStrings(): void
     {
-        $this->assertIsString(BizRoleFixtures::ADMIN_ROLE_REFERENCE);
-        $this->assertIsString(BizRoleFixtures::MODERATOR_ROLE_REFERENCE);
-        $this->assertIsString(BizRoleFixtures::USER_ROLE_REFERENCE);
-        $this->assertIsString(BizRoleFixtures::CONTENT_MANAGER_ROLE_REFERENCE);
-        $this->assertIsString(BizRoleFixtures::REPORT_VIEWER_ROLE_REFERENCE);
-        $this->assertIsString(BizRoleFixtures::ANALYST_ROLE_REFERENCE);
+
     }
 
     public function testConstantsAreNotEmpty(): void

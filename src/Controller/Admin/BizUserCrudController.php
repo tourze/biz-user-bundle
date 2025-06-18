@@ -14,6 +14,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+/**
+ * @extends AbstractCrudController<BizUser>
+ */
 class BizUserCrudController extends AbstractCrudController
 {
     private UserPasswordHasherInterface $passwordHasher;
@@ -79,6 +82,7 @@ class BizUserCrudController extends AbstractCrudController
      */
     public function persistEntity(\Doctrine\ORM\EntityManagerInterface $entityManager, $entityInstance): void
     {
+        assert($entityInstance instanceof BizUser);
         $this->encodePassword($entityInstance);
         parent::persistEntity($entityManager, $entityInstance);
         
@@ -91,11 +95,12 @@ class BizUserCrudController extends AbstractCrudController
      */
     public function updateEntity(\Doctrine\ORM\EntityManagerInterface $entityManager, $entityInstance): void
     {
+        assert($entityInstance instanceof BizUser);
         $this->encodePassword($entityInstance);
         parent::updateEntity($entityManager, $entityInstance);
         
         // 添加成功提示
-        $this->addFlash('success', '用户信息已更新！' . ($entityInstance->getPlainPassword() ? '密码已修改。' : ''));
+        $this->addFlash('success', '用户信息已更新！' . ($entityInstance->getPlainPassword() !== null ? '密码已修改。' : ''));
     }
 
     /**
@@ -104,7 +109,7 @@ class BizUserCrudController extends AbstractCrudController
     private function encodePassword(BizUser $user): void
     {
         // 检查是否有明文密码需要加密
-        if ($user->getPlainPassword()) {
+        if ($user->getPlainPassword() !== null && $user->getPlainPassword() !== '') {
             $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
             $user->setPasswordHash($hashedPassword);
             $user->eraseCredentials(); // 清除明文密码
@@ -116,10 +121,11 @@ class BizUserCrudController extends AbstractCrudController
      */
     public function deleteEntity(\Doctrine\ORM\EntityManagerInterface $entityManager, $entityInstance): void
     {
+        assert($entityInstance instanceof BizUser);
         $username = $entityInstance->getUsername();
         parent::deleteEntity($entityManager, $entityInstance);
         
         // 添加删除成功提示
-        $this->addFlash('success', sprintf('用户"%s"已被删除！', $username));
+        $this->addFlash('success', sprintf('用户"%s"已被删除！', (string) $username));
     }
 }
