@@ -21,31 +21,16 @@ use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\Copyable;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
 use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Filter\Keyword;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[Copyable]
-#[AsPermission(title: '系统角色')]
 #[ORM\Entity(repositoryClass: BizRoleRepository::class)]
 #[ORM\Table(name: 'biz_role', options: ['comment' => '系统角色'])]
 class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[Groups(['restful_read', 'api_tree', 'admin_curd', 'api_list'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -54,24 +39,16 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 
     #[IndexColumn]
     #[TrackColumn]
-    #[FormField(span: 9)]
-    #[Keyword]
-    #[ListColumn]
     #[CopyColumn(suffix: true)]
     #[ORM\Column(type: Types::STRING, length: 100, unique: true, options: ['comment' => '名称'])]
     private ?string $name = null;
 
     #[TrackColumn]
-    #[FormField(span: 9)]
-    #[Keyword]
-    #[ListColumn]
     #[CopyColumn(suffix: true)]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '标题'])]
     private ?string $title = null;
 
     #[TrackColumn]
-    #[FormField(span: 6)]
-    #[ListColumn]
     #[CopyColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '是否系统管理员'])]
     private ?bool $admin = false;
@@ -80,7 +57,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
      * @var array<string>
      */
     #[TrackColumn]
-    #[FormField(span: 24)]
     #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '拥有权限'])]
     private array $permissions = [];
@@ -92,9 +68,7 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\ManyToMany(targetEntity: BizUser::class, mappedBy: 'assignRoles', fetch: 'EXTRA_LAZY')]
     private Collection $users;
 
-    #[BoolColumn]
     #[TrackColumn]
-    #[ListColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['default' => 1, 'comment' => '是否有效'])]
     private ?bool $valid = true;
 
@@ -106,7 +80,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     /**
      * @var array<string>|null
      */
-    #[FormField(span: 24)]
     #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '要排除的权限'])]
     private ?array $excludePermissions = [];
@@ -114,8 +87,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     /**
      * @var array<string>|null
      */
-    #[ListColumn]
-    #[FormField]
     #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '继承角色'])]
     private ?array $hierarchicalRoles = ['ROLE_OPERATOR'];
@@ -152,19 +123,14 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
     private ?string $updatedBy = null;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[Groups(['restful_read', 'admin_curd'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTime $createdAt = null;
 
     #[UpdateTimeColumn]
-    #[ListColumn(order: 99, sorter: true)]
     #[Groups(['restful_read', 'admin_curd'])]
-    #[Filterable]
     #[ExportColumn]  
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]
     private ?\DateTime $updatedAt = null;
@@ -336,7 +302,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $this;
     }
 
-    #[ListColumn(order: 3, title: '拥有权限')]
     /**
      * @return array<int, array<string, mixed>>
      */

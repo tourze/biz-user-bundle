@@ -18,29 +18,15 @@ use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
 use Tourze\EasyAdmin\Attribute\Action\Listable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: '用户属性')]
 #[Listable]
-#[Creatable]
-#[Editable]
-#[Deletable]
 #[ORM\Entity(repositoryClass: UserAttributeRepository::class)]
 #[ORM\Table(name: 'biz_user_attribute', options: ['comment' => '用户属性'])]
 #[ORM\UniqueConstraint(name: 'biz_user_attribute_idx_uniq', columns: ['user_id', 'name'])]
 class UserAttribute implements ApiArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -59,28 +45,18 @@ class UserAttribute implements ApiArrayInterface, AdminArrayInterface
     private ?string $updatedBy = null;
 
     #[Ignore]
-    #[ListColumn(title: '所属用户')]
     #[ORM\ManyToOne(targetEntity: BizUser::class, inversedBy: 'attributes')]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?BizUser $user = null;
 
-    #[Filterable]
-    #[ListColumn]
-    #[FormField(span: 6)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 120, options: ['comment' => '属性名'])]
     private string $name;
 
-    #[Filterable]
-    #[ListColumn]
-    #[FormField(span: 12)]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::TEXT, options: ['comment' => '值'])]
     private ?string $value = null;
 
-    #[Filterable]
-    #[ListColumn]
-    #[FormField(span: 6)]
     #[ORM\Column(type: Types::STRING, length: 1000, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
 
@@ -92,17 +68,11 @@ class UserAttribute implements ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
-    #[ListColumn(order: 99, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[Filterable]
-    #[ExportColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]public function getId(): ?string
     {
         return $this->id;

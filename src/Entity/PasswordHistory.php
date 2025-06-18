@@ -9,8 +9,6 @@ use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 
 /**
  * 密码修改记录
@@ -19,8 +17,6 @@ use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 #[ORM\Table(name: 'password_history', options: ['comment' => '密码修改记录'])]
 class PasswordHistory
 {
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -44,14 +40,11 @@ class PasswordHistory
     #[ORM\Column(nullable: true)]
     private ?string $userId = null;
 
-    #[ListColumn(order: 99)]
     #[CreateIpColumn]
     #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;
 
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;

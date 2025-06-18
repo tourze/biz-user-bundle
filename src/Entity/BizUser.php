@@ -20,19 +20,10 @@ use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 use Tourze\EasyAdmin\Attribute\Column\ImportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
 use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Filter\Keyword;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EnumExtra\Itemable;
 use Tourze\LockServiceBundle\Model\LockEntity;
 
@@ -41,11 +32,7 @@ use Tourze\LockServiceBundle\Model\LockEntity;
  * @see https://symfony.com/doc/current/doctrine/reverse_engineering.html
  * @see https://docs.kilvn.com/skr-shop/src/account/#%E7%94%A8%E6%88%B7%E4%BD%93%E7%B3%BB
  */
-#[Editable]
-#[Creatable]
-#[Deletable]
 #[BatchDeletable]
-#[AsPermission(title: '系统用户')]
 #[ORM\Entity(repositoryClass: BizUserRepository::class)]
 #[ORM\Table(name: BizUser::TABLE_NAME, options: ['comment' => '系统用户'])]
 class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Itemable, \Stringable, AdminArrayInterface, PlainArrayInterface, ApiArrayInterface, LockEntity
@@ -53,8 +40,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     use TimestampableAware;
     public const TABLE_NAME = 'biz_user';
 
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[Groups(['restful_read', 'api_tree', 'admin_curd', 'api_list'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -63,9 +48,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     #[ImagePickerField]
     #[PictureColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
-    #[ListColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '头像'])]
     private ?string $avatar = null;
@@ -77,10 +60,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * @var string 一般可以用来表示 openid
      */
-    #[FormField(span: 9)]
-    #[Keyword]
     #[ImportColumn]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50)]
@@ -90,35 +70,26 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * 一般可以用来表示 unionid，或其他可以代表用户唯一性的内容
      */
-    #[FormField(span: 9)]
-    #[Keyword]
-    #[ListColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 64, nullable: true, options: ['comment' => '用户唯一标志'])]
     private ?string $identity = null;
 
-    #[FormField(span: 6)]
-    #[Keyword]
     #[ImportColumn]
     #[Groups(['restful_read'])]
-    #[ListColumn]
     #[TrackColumn]
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '昵称'])]
     private ?string $nickName = '';
 
-    #[FormField(span: 12)]
     #[Assert\Email]
     #[ORM\Column(type: Types::STRING, length: 500, nullable: true, options: ['comment' => '邮箱地址'])]
     private ?string $email = null;
 
-    #[FormField(span: 12)]
     #[TrackColumn]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '手机号码'])]
     private ?string $mobile = null;
 
-    #[FormField(id: 'inputPassword', title: '密码', span: 24)]
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '密码HASH'])]
     private ?string $passwordHash = null;
 
@@ -131,8 +102,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
      * @var Collection<BizRole>
      */
     #[Filterable(label: '分配角色')]
-    #[FormField(title: '分配角色')]
-    #[ListColumn(title: '分配角色')]
     #[ORM\ManyToMany(targetEntity: BizRole::class, inversedBy: 'users', cascade: ['persist'], fetch: 'EXTRA_LAZY')]
     private Collection $assignRoles;
 
@@ -140,7 +109,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
      * @var Collection<UserAttribute>
      */
     #[Groups(['restful_read'])]
-    #[FormField(title: '用户属性')]
     #[ORM\OneToMany(targetEntity: UserAttribute::class, mappedBy: 'user', cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true, indexBy: 'name')]
     private Collection $attributes;
 
@@ -166,26 +134,17 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $address = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[Groups(['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
-    #[ListColumn(order: 99, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[Filterable]
-    #[ExportColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]public function __construct()
     {
         $this->assignRoles = new ArrayCollection();
