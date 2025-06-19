@@ -1,0 +1,125 @@
+<?php
+
+namespace BizUserBundle\Tests\Controller\Admin;
+
+use BizUserBundle\Controller\Admin\RoleEntityPermissionCrudController;
+use BizUserBundle\Entity\BizRole;
+use BizUserBundle\Entity\RoleEntityPermission;
+use BizUserBundle\Repository\RoleEntityPermissionRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use PHPUnit\Framework\TestCase;
+
+class RoleEntityPermissionCrudControllerTest extends TestCase
+{
+    private RoleEntityPermissionCrudController $controller;
+    private EntityManagerInterface $entityManager;
+    private RoleEntityPermissionRepository $repository;
+
+    protected function setUp(): void
+    {
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->repository = $this->createMock(RoleEntityPermissionRepository::class);
+        $this->controller = new RoleEntityPermissionCrudController();
+    }
+
+    public function testGetEntityFqcn(): void
+    {
+        $this->assertSame(RoleEntityPermission::class, RoleEntityPermissionCrudController::getEntityFqcn());
+    }
+
+    public function testConfigureCrud(): void
+    {
+        $crud = $this->createMock(Crud::class);
+        $result = $this->controller->configureCrud($crud);
+        
+        $this->assertInstanceOf(Crud::class, $result);
+    }
+
+    public function testConfigureFields(): void
+    {
+        $fields = iterator_to_array($this->controller->configureFields(Crud::PAGE_INDEX));
+        
+        $this->assertNotEmpty($fields);
+        $this->assertGreaterThanOrEqual(5, count($fields));
+    }
+
+    public function testConfigureFieldsForNewPage(): void
+    {
+        $fields = iterator_to_array($this->controller->configureFields(Crud::PAGE_NEW));
+        
+        $this->assertNotEmpty($fields);
+    }
+
+    public function testConfigureFieldsForEditPage(): void
+    {
+        $fields = iterator_to_array($this->controller->configureFields(Crud::PAGE_EDIT));
+        
+        $this->assertNotEmpty($fields);
+    }
+
+    public function testConfigureFieldsForDetailPage(): void
+    {
+        $fields = iterator_to_array($this->controller->configureFields(Crud::PAGE_DETAIL));
+        
+        $this->assertNotEmpty($fields);
+        $this->assertGreaterThan(7, count($fields));
+    }
+
+    public function testConfigureFiltersMethodExists(): void
+    {
+        $this->assertTrue(method_exists($this->controller, 'configureFilters'));
+    }
+
+    public function testConfigureActionsMethodExists(): void
+    {
+        $this->assertTrue(method_exists($this->controller, 'configureActions'));
+    }
+
+
+
+
+    public function testRoleEntityPermissionFields(): void
+    {
+        $role = new BizRole();
+        $role->setName('ROLE_ADMIN');
+        $role->setTitle('管理员');
+
+        $permission = new RoleEntityPermission();
+        $permission->setRole($role);
+        $permission->setEntityClass('App\\Entity\\User');
+        $permission->setStatement('department_id = 1');
+        $permission->setRemark('只能查看本部门用户');
+        $permission->setValid(true);
+
+        $this->assertEquals($role, $permission->getRole());
+        $this->assertEquals('App\\Entity\\User', $permission->getEntityClass());
+        $this->assertEquals('department_id = 1', $permission->getStatement());
+        $this->assertEquals('只能查看本部门用户', $permission->getRemark());
+        $this->assertTrue($permission->isValid());
+    }
+
+    public function testDataPermissionConstraints(): void
+    {
+        $role = new BizRole();
+        $role->setName('ROLE_MANAGER');
+        $role->setTitle('经理');
+
+        $permission1 = new RoleEntityPermission();
+        $permission1->setRole($role);
+        $permission1->setEntityClass('App\\Entity\\Project');
+        $permission1->setStatement('manager_id = :user_id');
+        $permission1->setValid(true);
+
+        $permission2 = new RoleEntityPermission();
+        $permission2->setRole($role);
+        $permission2->setEntityClass('App\\Entity\\Task');
+        $permission2->setStatement('project.manager_id = :user_id');
+        $permission2->setValid(true);
+
+        $this->assertEquals('App\\Entity\\Project', $permission1->getEntityClass());
+        $this->assertEquals('manager_id = :user_id', $permission1->getStatement());
+        $this->assertEquals('App\\Entity\\Task', $permission2->getEntityClass());
+        $this->assertEquals('project.manager_id = :user_id', $permission2->getStatement());
+    }
+}

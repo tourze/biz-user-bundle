@@ -58,13 +58,6 @@ class BizRoleTest extends TestCase
         $this->role->setHierarchicalRoles($hierarchicalRoles);
         $this->assertEquals($hierarchicalRoles, $this->role->getHierarchicalRoles());
 
-        // 测试付费角色
-        $this->role->setBillable(true);
-        $this->assertTrue($this->role->isBillable());
-
-        // 测试审计要求
-        $this->role->setAuditRequired(true);
-        $this->assertTrue($this->role->isAuditRequired());
 
         // 测试IP地址
         $this->role->setCreatedFromIp('127.0.0.1');

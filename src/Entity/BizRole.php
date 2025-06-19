@@ -96,12 +96,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\OneToMany(targetEntity: RoleEntityPermission::class, mappedBy: 'role')]
     private Collection $dataPermissions;
 
-    #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '是否付费角色'])]
-    private ?bool $billable = null;
-
-    #[ORM\Column(nullable: true, options: ['comment' => '是否需要审计'])]
-    private ?bool $auditRequired = null;
-
     #[CreateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;
@@ -353,29 +347,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $this;
     }
 
-    public function isBillable(): ?bool
-    {
-        return $this->billable;
-    }
-
-    public function setBillable(?bool $billable): static
-    {
-        $this->billable = $billable;
-
-        return $this;
-    }
-
-    public function isAuditRequired(): ?bool
-    {
-        return $this->auditRequired;
-    }
-
-    public function setAuditRequired(?bool $auditRequired): static
-    {
-        $this->auditRequired = $auditRequired;
-
-        return $this;
-    }
 
     /**
      * @return array<string, mixed>
