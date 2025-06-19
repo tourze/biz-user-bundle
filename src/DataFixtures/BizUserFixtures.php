@@ -13,6 +13,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Tourze\UserServiceContracts\UserServiceConstants;
 
 /**
  * 用户数据填充
@@ -137,6 +138,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
 
     public static function getGroups(): array
     {
-        return ['user'];
+        return [
+            UserServiceConstants::USER_FIXTURES_NAME,
+        ];
     }
 }

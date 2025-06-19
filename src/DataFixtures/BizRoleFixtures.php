@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
+use Tourze\UserServiceContracts\UserServiceConstants;
 
 /**
  * 角色数据填充
@@ -112,6 +113,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
 
     public static function getGroups(): array
     {
-        return ['user'];
+        return [
+            UserServiceConstants::USER_FIXTURES_NAME,
+        ];
     }
 }
