@@ -73,7 +73,9 @@ class BizUserFixturesTest extends TestCase
 
     public function testConstantsAreStrings(): void
     {
-
+        $this->assertIsString(BizUserFixtures::ADMIN_USER_REFERENCE);
+        $this->assertIsString(BizUserFixtures::MODERATOR_USER_REFERENCE);
+        $this->assertIsString(BizUserFixtures::NORMAL_USER_REFERENCE_PREFIX);
     }
 
     public function testConstantsAreNotEmpty(): void

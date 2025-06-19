@@ -91,7 +91,7 @@ class BizUserTest extends TestCase
         $this->assertEquals('No.1 Science Avenue', $this->user->getAddress());
 
         // 测试时间字段
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->user->setCreateTime($now);
         $this->assertSame($now, $this->user->getCreateTime());
 

@@ -97,7 +97,7 @@ class RoleEntityPermissionRepositoryTest extends TestCase
     public function testRoleEntityPermissionTimestamps(): void
     {
         $permission = new RoleEntityPermission();
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         
         // Test functionality instead of method existence
         $permission->setCreateTime($now);

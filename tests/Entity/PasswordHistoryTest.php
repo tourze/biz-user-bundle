@@ -41,7 +41,7 @@ class PasswordHistoryTest extends TestCase
         $this->assertEquals('192.168.1.100', $this->passwordHistory->getCreatedFromIp());
 
         // 测试创建时间
-        $createTime = new \DateTime();
+        $createTime = new \DateTimeImmutable();
         $this->passwordHistory->setCreateTime($createTime);
         $this->assertSame($createTime, $this->passwordHistory->getCreateTime());
     }
@@ -192,7 +192,7 @@ class PasswordHistoryTest extends TestCase
      */
     public function testSetCreateTime(): void
     {
-        $createTime = new \DateTime('2023-05-15 14:30:00');
+        $createTime = new \DateTimeImmutable('2023-05-15 14:30:00');
         $result = $this->passwordHistory->setCreateTime($createTime);
 
         // 检查返回值是自身（用于链式调用）

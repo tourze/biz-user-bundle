@@ -53,7 +53,7 @@ class UserAttributeTest extends TestCase
         $this->assertEquals('moderator', $this->attribute->getUpdatedBy());
 
         // 测试时间字段
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->attribute->setCreateTime($now);
         $this->assertSame($now, $this->attribute->getCreateTime());
 
@@ -327,8 +327,8 @@ class UserAttributeTest extends TestCase
      */
     public function testTimeSetters(): void
     {
-        $createTime = new \DateTime('2023-01-01 10:00:00');
-        $updateTime = new \DateTime('2023-01-02 15:30:00');
+        $createTime = new \DateTimeImmutable('2023-01-01 10:00:00');
+        $updateTime = new \DateTimeImmutable('2023-01-02 15:30:00');
 
         $this->attribute->setCreateTime($createTime);
         $this->attribute->setUpdateTime($updateTime);

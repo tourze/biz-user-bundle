@@ -51,7 +51,7 @@ class RoleEntityPermissionTest extends TestCase
         $this->assertEquals('moderator', $this->permission->getUpdatedBy());
 
         // 测试时间字段
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->permission->setCreateTime($now);
         $this->assertSame($now, $this->permission->getCreateTime());
 
@@ -204,7 +204,7 @@ class RoleEntityPermissionTest extends TestCase
      */
     public function testSetCreateTime(): void
     {
-        $createTime = new \DateTime('2023-06-01 09:00:00');
+        $createTime = new \DateTimeImmutable('2023-06-01 09:00:00');
         $this->permission->setCreateTime($createTime);
 
         $this->assertSame($createTime, $this->permission->getCreateTime());
@@ -215,7 +215,7 @@ class RoleEntityPermissionTest extends TestCase
      */
     public function testSetUpdateTime(): void
     {
-        $updateTime = new \DateTime('2023-06-02 10:30:00');
+        $updateTime = new \DateTimeImmutable('2023-06-02 10:30:00');
         $this->permission->setUpdateTime($updateTime);
 
         $this->assertSame($updateTime, $this->permission->getUpdateTime());

@@ -7,6 +7,7 @@ namespace BizUserBundle\DataFixtures;
 use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\BizUser;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -46,8 +47,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $adminUser->setMobile('13800000001');
         $adminUser->setPasswordHash($this->passwordHasher->hashPassword($adminUser, self::DEFAULT_PASSWORD));
         $adminUser->setValid(true);
-        $adminUser->setCreateTime(Carbon::now()->modify('-30 days'));
-        $adminUser->setUpdateTime(Carbon::now()->modify('-30 days'));
+        $adminUser->setCreateTime(CarbonImmutable::now()->modify('-30 days'));
+        $adminUser->setUpdateTime(CarbonImmutable::now()->modify('-30 days'));
 
         $manager->persist($adminUser);
         $this->addReference(self::ADMIN_USER_REFERENCE, $adminUser);
@@ -61,8 +62,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $moderatorUser->setMobile('13800000002');
         $moderatorUser->setPasswordHash($this->passwordHasher->hashPassword($moderatorUser, self::DEFAULT_PASSWORD));
         $moderatorUser->setValid(true);
-        $moderatorUser->setCreateTime(Carbon::now()->modify('-25 days'));
-        $moderatorUser->setUpdateTime(Carbon::now()->modify('-25 days'));
+        $moderatorUser->setCreateTime(CarbonImmutable::now()->modify('-25 days'));
+        $moderatorUser->setUpdateTime(CarbonImmutable::now()->modify('-25 days'));
 
         $manager->persist($moderatorUser);
         $this->addReference(self::MODERATOR_USER_REFERENCE, $moderatorUser);
@@ -76,8 +77,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $contentManagerUser->setMobile('13800000003');
         $contentManagerUser->setPasswordHash($this->passwordHasher->hashPassword($contentManagerUser, self::DEFAULT_PASSWORD));
         $contentManagerUser->setValid(true);
-        $contentManagerUser->setCreateTime(Carbon::now()->modify('-24 days'));
-        $contentManagerUser->setUpdateTime(Carbon::now()->modify('-24 days'));
+        $contentManagerUser->setCreateTime(CarbonImmutable::now()->modify('-24 days'));
+        $contentManagerUser->setUpdateTime(CarbonImmutable::now()->modify('-24 days'));
         $manager->persist($contentManagerUser);
 
         $reportViewerUser = new BizUser();
@@ -88,8 +89,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $reportViewerUser->setMobile('13800000004');
         $reportViewerUser->setPasswordHash($this->passwordHasher->hashPassword($reportViewerUser, self::DEFAULT_PASSWORD));
         $reportViewerUser->setValid(true);
-        $reportViewerUser->setCreateTime(Carbon::now()->modify('-23 days'));
-        $reportViewerUser->setUpdateTime(Carbon::now()->modify('-23 days'));
+        $reportViewerUser->setCreateTime(CarbonImmutable::now()->modify('-23 days'));
+        $reportViewerUser->setUpdateTime(CarbonImmutable::now()->modify('-23 days'));
         $manager->persist($reportViewerUser);
 
         $analystUser = new BizUser();
@@ -100,14 +101,14 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $analystUser->setMobile('13800000005');
         $analystUser->setPasswordHash($this->passwordHasher->hashPassword($analystUser, self::DEFAULT_PASSWORD));
         $analystUser->setValid(true);
-        $analystUser->setCreateTime(Carbon::now()->modify('-22 days'));
-        $analystUser->setUpdateTime(Carbon::now()->modify('-22 days'));
+        $analystUser->setCreateTime(CarbonImmutable::now()->modify('-22 days'));
+        $analystUser->setUpdateTime(CarbonImmutable::now()->modify('-22 days'));
         $manager->persist($analystUser);
 
         // 创建普通用户
         for ($i = 1; $i <= 20; $i++) {
             $randomDays = rand(1, 20);
-            $createTime = Carbon::now()->modify('-' . $randomDays . ' days');
+            $createTime = CarbonImmutable::now()->modify('-' . $randomDays . ' days');
 
             $user = new BizUser();
             $user->setUsername('user' . $i);

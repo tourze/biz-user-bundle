@@ -81,7 +81,7 @@ class BizRoleTest extends TestCase
         $this->assertEquals('moderator', $this->role->getUpdatedBy());
 
         // 测试时间字段
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->role->setCreateTime($now);
         $this->assertSame($now, $this->role->getCreateTime());
 
@@ -300,7 +300,7 @@ class BizRoleTest extends TestCase
         $this->role->setValid(true);
         $this->role->setHierarchicalRoles(['ROLE_USER']);
 
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->role->setCreateTime($now);
         $this->role->setUpdateTime($now);
 
@@ -310,16 +310,19 @@ class BizRoleTest extends TestCase
         $this->assertArrayHasKey('title', $result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('hierarchicalRoles', $result);
-        $this->assertArrayHasKey('createTime', $result);
-        $this->assertArrayHasKey('updateTime', $result);
 
         $this->assertEquals(1, $result['id']);
         $this->assertEquals('ROLE_ADMIN', $result['name']);
         $this->assertEquals('系统管理员', $result['title']);
         $this->assertTrue($result['valid']);
         $this->assertEquals(['ROLE_USER'], $result['hierarchicalRoles']);
-        $this->assertEquals($now->format('Y-m-d H:i:s'), $result['createTime']);
-        $this->assertEquals($now->format('Y-m-d H:i:s'), $result['updateTime']);
+        
+        // 测试时间戳数组
+        $timestampArray = $this->role->retrieveTimestampArray();
+        $this->assertArrayHasKey('createTime', $timestampArray);
+        $this->assertArrayHasKey('updateTime', $timestampArray);
+        $this->assertEquals($now->format('Y-m-d H:i:s'), $timestampArray['createTime']);
+        $this->assertEquals($now->format('Y-m-d H:i:s'), $timestampArray['updateTime']);
     }
 
     /**

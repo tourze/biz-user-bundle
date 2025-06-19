@@ -14,8 +14,6 @@ use Tourze\Arrayable\PlainArrayInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
@@ -23,7 +21,6 @@ use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\Copyable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
 use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 
 #[Copyable]
 #[ORM\Entity(repositoryClass: BizRoleRepository::class)]
@@ -31,7 +28,7 @@ use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
-    #[Groups(['restful_read', 'api_tree', 'admin_curd', 'api_list'])]
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -122,18 +119,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[Groups(['restful_read'])]
     #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
     private ?string $updatedBy = null;
-
-    #[IndexColumn]
-    #[CreateTimeColumn]
-    #[Groups(['restful_read', 'admin_curd'])]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
-    private ?\DateTime $createdAt = null;
-
-    #[UpdateTimeColumn]
-    #[Groups(['restful_read', 'admin_curd'])]
-    #[ExportColumn]  
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]
-    private ?\DateTime $updatedAt = null;
 
     public function __construct()
     {
@@ -403,8 +388,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
             'title' => $this->getTitle(),
             'valid' => $this->isValid(),
             'hierarchicalRoles' => $this->getHierarchicalRoles(),
-            'createTime' => $this->createdAt?->format('Y-m-d H:i:s'),
-            'updateTime' => $this->updatedAt?->format('Y-m-d H:i:s'),
         ];
     }
 

@@ -6,6 +6,7 @@ namespace BizUserBundle\DataFixtures;
 
 use BizUserBundle\Entity\BizRole;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -42,8 +43,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $adminRole->setAdmin(true);
         $adminRole->setValid(true);
         $adminRole->setPermissions(['admin', 'user_manage', 'role_manage', 'content_manage', 'system_config']);
-        $adminRole->setCreateTime(Carbon::now()->modify('-60 days'));
-        $adminRole->setUpdateTime(Carbon::now()->modify('-30 days'));
+        $adminRole->setCreateTime(CarbonImmutable::now()->modify('-60 days'));
+        $adminRole->setUpdateTime(CarbonImmutable::now()->modify('-30 days'));
         $manager->persist($adminRole);
         $this->addReference(self::ADMIN_ROLE_REFERENCE, $adminRole);
 
@@ -54,8 +55,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $moderatorRole->setAdmin(false);
         $moderatorRole->setValid(true);
         $moderatorRole->setPermissions(['content_audit', 'report_view', 'keyword_manage']);
-        $moderatorRole->setCreateTime(Carbon::now()->modify('-55 days'));
-        $moderatorRole->setUpdateTime(Carbon::now()->modify('-25 days'));
+        $moderatorRole->setCreateTime(CarbonImmutable::now()->modify('-55 days'));
+        $moderatorRole->setUpdateTime(CarbonImmutable::now()->modify('-25 days'));
         $manager->persist($moderatorRole);
         $this->addReference(self::MODERATOR_ROLE_REFERENCE, $moderatorRole);
 
@@ -66,8 +67,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $userRole->setAdmin(false);
         $userRole->setValid(true);
         $userRole->setPermissions(['profile_view', 'content_create']);
-        $userRole->setCreateTime(Carbon::now()->modify('-50 days'));
-        $userRole->setUpdateTime(Carbon::now()->modify('-20 days'));
+        $userRole->setCreateTime(CarbonImmutable::now()->modify('-50 days'));
+        $userRole->setUpdateTime(CarbonImmutable::now()->modify('-20 days'));
         $manager->persist($userRole);
         $this->addReference(self::USER_ROLE_REFERENCE, $userRole);
 
@@ -78,8 +79,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $contentManagerRole->setAdmin(false);
         $contentManagerRole->setValid(true);
         $contentManagerRole->setPermissions(['content_manage', 'content_delete', 'content_edit']);
-        $contentManagerRole->setCreateTime(Carbon::now()->modify('-45 days'));
-        $contentManagerRole->setUpdateTime(Carbon::now()->modify('-15 days'));
+        $contentManagerRole->setCreateTime(CarbonImmutable::now()->modify('-45 days'));
+        $contentManagerRole->setUpdateTime(CarbonImmutable::now()->modify('-15 days'));
         $manager->persist($contentManagerRole);
         $this->addReference(self::CONTENT_MANAGER_ROLE_REFERENCE, $contentManagerRole);
 
@@ -90,8 +91,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $reportViewerRole->setAdmin(false);
         $reportViewerRole->setValid(true);
         $reportViewerRole->setPermissions(['report_view', 'statistics_view']);
-        $reportViewerRole->setCreateTime(Carbon::now()->modify('-40 days'));
-        $reportViewerRole->setUpdateTime(Carbon::now()->modify('-10 days'));
+        $reportViewerRole->setCreateTime(CarbonImmutable::now()->modify('-40 days'));
+        $reportViewerRole->setUpdateTime(CarbonImmutable::now()->modify('-10 days'));
         $manager->persist($reportViewerRole);
         $this->addReference(self::REPORT_VIEWER_ROLE_REFERENCE, $reportViewerRole);
 
@@ -102,8 +103,8 @@ class BizRoleFixtures extends Fixture implements FixtureGroupInterface
         $analystRole->setAdmin(false);
         $analystRole->setValid(true);
         $analystRole->setPermissions(['report_view', 'statistics_view', 'data_export', 'data_analysis']);
-        $analystRole->setCreateTime(Carbon::now()->modify('-35 days'));
-        $analystRole->setUpdateTime(Carbon::now()->modify('-5 days'));
+        $analystRole->setCreateTime(CarbonImmutable::now()->modify('-35 days'));
+        $analystRole->setUpdateTime(CarbonImmutable::now()->modify('-5 days'));
         $manager->persist($analystRole);
         $this->addReference(self::ANALYST_ROLE_REFERENCE, $analystRole);
 

@@ -60,7 +60,9 @@ class BizRoleFixturesTest extends TestCase
 
     public function testConstantsAreStrings(): void
     {
-
+        $this->assertIsString(BizRoleFixtures::ADMIN_ROLE_REFERENCE);
+        $this->assertIsString(BizRoleFixtures::MODERATOR_ROLE_REFERENCE);
+        $this->assertIsString(BizRoleFixtures::USER_ROLE_REFERENCE);
     }
 
     public function testConstantsAreNotEmpty(): void
