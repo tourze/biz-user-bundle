@@ -15,7 +15,7 @@ use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
  */
 #[ORM\Entity(repositoryClass: PasswordHistoryRepository::class, readOnly: true)]
 #[ORM\Table(name: 'password_history', options: ['comment' => '密码修改记录'])]
-class PasswordHistory
+class PasswordHistory implements \Stringable
 {
     use CreateTimeAware;
 
@@ -28,18 +28,18 @@ class PasswordHistory
     #[ORM\Column(length: 130, nullable: true, options: ['comment' => '密码'])]
     private ?string $ciphertext = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '过期时间'])]
-    private ?\DateTimeInterface $expireTime = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '过期时间'])]
+    private ?\DateTimeImmutable $expireTime = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => '是否需要重置'])]
     private ?bool $needReset = null;
 
     #[IndexColumn]
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 50, nullable: true, options: ['comment' => '用户名'])]
     private ?string $username = null;
 
     #[IndexColumn]
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(nullable: true, options: ['comment' => '用户ID'])]
     private ?string $userId = null;
 
     #[CreateIpColumn]
@@ -56,6 +56,15 @@ class PasswordHistory
         return $this->id;
     }
 
+    public function __toString(): string
+    {
+        if (!$this->getId()) {
+            return '';
+        }
+
+        return sprintf('PasswordHistory %s (%s)', $this->getId(), $this->getUsername());
+    }
+
     public function getCiphertext(): ?string
     {
         return $this->ciphertext;
@@ -68,12 +77,12 @@ class PasswordHistory
         return $this;
     }
 
-    public function getExpireTime(): ?\DateTimeInterface
+    public function getExpireTime(): ?\DateTimeImmutable
     {
         return $this->expireTime;
     }
 
-    public function setExpireTime(?\DateTimeInterface $expireTime): static
+    public function setExpireTime(?\DateTimeImmutable $expireTime): static
     {
         $this->expireTime = $expireTime;
 

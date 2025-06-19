@@ -13,17 +13,15 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Listable;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
-#[Listable]
 #[ORM\Entity(repositoryClass: UserAttributeRepository::class)]
 #[ORM\Table(name: 'biz_user_attribute', options: ['comment' => '用户属性'])]
 #[ORM\UniqueConstraint(name: 'biz_user_attribute_idx_uniq', columns: ['user_id', 'name'])]
-class UserAttribute implements ApiArrayInterface, AdminArrayInterface
+class UserAttribute implements \Stringable, ApiArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
+    use BlameableAware;
     #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -31,15 +29,6 @@ class UserAttribute implements ApiArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[CreatedByColumn]
-    #[Groups(['restful_read'])]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[Groups(['restful_read'])]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[Ignore]
     #[ORM\ManyToOne(targetEntity: BizUser::class, inversedBy: 'attributes')]
@@ -70,28 +59,13 @@ class UserAttribute implements ApiArrayInterface, AdminArrayInterface
         return $this->id;
     }
 
-    public function setCreatedBy(?string $createdBy): self
+    public function __toString(): string
     {
-        $this->createdBy = $createdBy;
+        if (!$this->getId()) {
+            return '';
+        }
 
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
+        return sprintf('UserAttribute %s (%s)', $this->getId(), $this->getName());
     }
 
     public function getName(): string

@@ -10,7 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
@@ -146,7 +145,7 @@ class BizRoleCrudController extends AbstractCrudController
         $title = $entityInstance->getTitle();
         
         if ($entityInstance->getUsers()->count() > 0) {
-            $this->addFlash('error', sprintf('角色"%s"下还有用户，无法删除！', $title));
+            $this->addFlash('danger', sprintf('角色"%s"下还有用户，无法删除！', $title));
             return;
         }
         

@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\Arrayable\AdminArrayInterface;
 use Tourze\Arrayable\PlainArrayInterface;
@@ -16,18 +15,14 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Copyable;
-use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
-#[Copyable]
 #[ORM\Entity(repositoryClass: BizRoleRepository::class)]
 #[ORM\Table(name: 'biz_role', options: ['comment' => '系统角色'])]
 class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
+    use BlameableAware;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,17 +31,14 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
 
     #[IndexColumn]
     #[TrackColumn]
-    #[CopyColumn(suffix: true)]
     #[ORM\Column(type: Types::STRING, length: 100, unique: true, options: ['comment' => '名称'])]
     private ?string $name = null;
 
     #[TrackColumn]
-    #[CopyColumn(suffix: true)]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '标题'])]
     private ?string $title = null;
 
     #[TrackColumn]
-    #[CopyColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '是否系统管理员'])]
     private ?bool $admin = false;
 
@@ -54,7 +46,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
      * @var array<string>
      */
     #[TrackColumn]
-    #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '拥有权限'])]
     private array $permissions = [];
 
@@ -70,21 +61,18 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     private ?bool $valid = true;
 
     #[TrackColumn]
-    #[CopyColumn]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '自定义菜单JSON'])]
     private ?string $menuJson = '';
 
     /**
      * @var array<string>|null
      */
-    #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '要排除的权限'])]
     private ?array $excludePermissions = [];
 
     /**
      * @var array<string>|null
      */
-    #[CopyColumn]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '继承角色'])]
     private ?array $hierarchicalRoles = ['ROLE_OPERATOR'];
 
@@ -92,7 +80,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
      * @var Collection<int, RoleEntityPermission>
      */
     #[Ignore]
-    #[CurdAction(label: '数据权限')]
     #[ORM\OneToMany(targetEntity: RoleEntityPermission::class, mappedBy: 'role')]
     private Collection $dataPermissions;
 
@@ -104,15 +91,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
 
-    #[CreatedByColumn]
-    #[Groups(['restful_read'])]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[Groups(['restful_read'])]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     public function __construct()
     {
@@ -134,29 +112,6 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
         return $this->id;
     }
 
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }
 
     public function getName(): string
     {

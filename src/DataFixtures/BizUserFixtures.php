@@ -6,7 +6,6 @@ namespace BizUserBundle\DataFixtures;
 
 use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\BizUser;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace BizUserBundle\DataFixtures;
 
 use BizUserBundle\Entity\BizRole;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;

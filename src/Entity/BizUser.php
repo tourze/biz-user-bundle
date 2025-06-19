@@ -17,10 +17,6 @@ use Tourze\Arrayable\PlainArrayInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\EasyAdmin\Attribute\Column\ImportColumn;
-use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EnumExtra\Itemable;
 use Tourze\LockServiceBundle\Model\LockEntity;
 
@@ -42,8 +38,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
     private ?int $id = 0;
 
-    #[ImagePickerField]
-    #[PictureColumn]
     #[Groups(['restful_read'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '头像'])]
@@ -56,22 +50,17 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * @var string 一般可以用来表示 openid
      */
-    #[ImportColumn]
     #[Groups(['restful_read'])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50)]
     #[ORM\Column(type: Types::STRING, length: 120, unique: true, options: ['comment' => '用户名'])]
     private string $username;
 
-    /**
-     * 一般可以用来表示 unionid，或其他可以代表用户唯一性的内容
-     */
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 64, nullable: true, options: ['comment' => '用户唯一标志'])]
     private ?string $identity = null;
 
-    #[ImportColumn]
     #[Groups(['restful_read'])]
     #[TrackColumn]
     #[Assert\NotBlank]
@@ -97,7 +86,6 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * @var Collection<BizRole>
      */
-    #[Filterable(label: '分配角色')]
     #[ORM\ManyToMany(targetEntity: BizRole::class, inversedBy: 'users', cascade: ['persist'], fetch: 'EXTRA_LAZY')]
     private Collection $assignRoles;
 
@@ -109,25 +97,25 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     private Collection $attributes;
 
     #[TrackColumn]
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true, options: ['comment' => '生日'])]
     private ?\DateTimeInterface $birthday = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
+    #[ORM\Column(length: 20, nullable: true, options: ['comment' => '性别'])]
     private ?string $gender = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 100, nullable: true, options: ['comment' => '省份名称'])]
     private ?string $provinceName = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 100, nullable: true, options: ['comment' => '城市名称'])]
     private ?string $cityName = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 100, nullable: true, options: ['comment' => '区域名称'])]
     private ?string $areaName = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true, options: ['comment' => '详细地址'])]
     private ?string $address = null;
 
     #[IndexColumn]

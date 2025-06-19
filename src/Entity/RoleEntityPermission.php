@@ -11,17 +11,15 @@ use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Listable;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
-#[Listable]
 #[ORM\Table(name: 'biz_data_permission', options: ['comment' => '角色实体数据权限'])]
 #[ORM\UniqueConstraint(name: 'biz_data_permission_idx_uniq', columns: ['role_id', 'entity_class'])]
 #[ORM\Entity(repositoryClass: RoleEntityPermissionRepository::class)]
-class RoleEntityPermission
+class RoleEntityPermission implements \Stringable
 {
     use TimestampableAware;
+    use BlameableAware;
     #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -53,15 +51,6 @@ class RoleEntityPermission
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
-    #[CreatedByColumn]
-    #[Groups(['restful_read'])]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[Groups(['restful_read'])]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     public function getId(): ?string
     {
@@ -128,26 +117,12 @@ class RoleEntityPermission
         return $this;
     }
 
-    public function setCreatedBy(?string $createdBy): self
+    public function __toString(): string
     {
-        $this->createdBy = $createdBy;
+        if (!$this->getId()) {
+            return '';
+        }
 
-        return $this;
+        return sprintf('RoleEntityPermission %s (%s)', $this->getId(), $this->getEntityClass());
     }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }}
+}
