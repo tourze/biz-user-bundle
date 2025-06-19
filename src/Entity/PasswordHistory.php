@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
+use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
 
 /**
  * 密码修改记录
@@ -17,6 +17,8 @@ use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 #[ORM\Table(name: 'password_history', options: ['comment' => '密码修改记录'])]
 class PasswordHistory
 {
+    use CreateTimeAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -43,11 +45,6 @@ class PasswordHistory
     #[CreateIpColumn]
     #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;
-
-    #[IndexColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
-    private ?\DateTimeInterface $createTime = null;
 
     public function __construct(bool $needReset = false)
     {
@@ -120,17 +117,5 @@ class PasswordHistory
     public function setCreatedFromIp(?string $createdFromIp): void
     {
         $this->createdFromIp = $createdFromIp;
-    }
-
-    public function setCreateTime(?\DateTimeInterface $createdAt): self
-    {
-        $this->createTime = $createdAt;
-
-        return $this;
-    }
-
-    public function getCreateTime(): ?\DateTimeInterface
-    {
-        return $this->createTime;
     }
 }
