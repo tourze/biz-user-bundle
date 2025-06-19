@@ -19,7 +19,6 @@ use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\EasyAdmin\Attribute\Action\BatchDeletable;
 use Tourze\EasyAdmin\Attribute\Column\ImportColumn;
 use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
@@ -32,7 +31,6 @@ use Tourze\LockServiceBundle\Model\LockEntity;
  * @see https://symfony.com/doc/current/doctrine/reverse_engineering.html
  * @see https://docs.kilvn.com/skr-shop/src/account/#%E7%94%A8%E6%88%B7%E4%BD%93%E7%B3%BB
  */
-#[BatchDeletable]
 #[ORM\Entity(repositoryClass: BizUserRepository::class)]
 #[ORM\Table(name: BizUser::TABLE_NAME, options: ['comment' => '系统用户'])]
 class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Itemable, \Stringable, AdminArrayInterface, PlainArrayInterface, ApiArrayInterface, LockEntity
