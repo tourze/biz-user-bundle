@@ -126,7 +126,7 @@ class UserAttributeFixtures extends Fixture implements FixtureGroupInterface, De
         }
 
         // 为特定用户添加 API Token 属性
-        $contentManagerUser = $this->getReference("user-10", BizUser::class);
+        $contentManagerUser = $this->getReference("user-3", BizUser::class);
         $apiTokenAttr = new UserAttribute();
         $apiTokenAttr->setUser($contentManagerUser);
         $apiTokenAttr->setName(self::ATTR_API_TOKEN);

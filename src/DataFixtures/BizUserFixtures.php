@@ -105,8 +105,8 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $analystUser->setUpdateTime(CarbonImmutable::now()->modify('-22 days'));
         $manager->persist($analystUser);
 
-        // 创建普通用户
-        for ($i = 1; $i <= 20; $i++) {
+        // 创建普通用户（减少到5个以加快开发环境加载速度）
+        for ($i = 1; $i <= 5; $i++) {
             $randomDays = rand(1, 20);
             $createTime = CarbonImmutable::now()->modify('-' . $randomDays . ' days');
 

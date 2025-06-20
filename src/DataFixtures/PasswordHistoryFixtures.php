@@ -55,7 +55,7 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
         ], self::MODERATOR_PASSWORD_HISTORY_REFERENCE);
 
         // 为普通用户创建密码历史记录
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             $user = $this->getReference(BizUserFixtures::NORMAL_USER_REFERENCE_PREFIX . $i, BizUser::class);
 
             $passwordHistories = [
