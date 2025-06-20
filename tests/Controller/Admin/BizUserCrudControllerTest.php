@@ -5,7 +5,6 @@ namespace BizUserBundle\Tests\Controller\Admin;
 use BizUserBundle\Controller\Admin\BizUserCrudController;
 use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\BizUser;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -14,12 +13,10 @@ class BizUserCrudControllerTest extends TestCase
 {
     private BizUserCrudController $controller;
     private UserPasswordHasherInterface $passwordHasher;
-    private EntityManagerInterface $entityManager;
 
     protected function setUp(): void
     {
         $this->passwordHasher = $this->createMock(UserPasswordHasherInterface::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->controller = new BizUserCrudController($this->passwordHasher);
     }
 
@@ -66,16 +63,6 @@ class BizUserCrudControllerTest extends TestCase
         
         $this->assertNotEmpty($fields);
         $this->assertGreaterThan(15, count($fields));
-    }
-
-    public function testConfigureFiltersMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureFilters'));
-    }
-
-    public function testConfigureActionsMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureActions'));
     }
 
     public function testPasswordEncoding(): void

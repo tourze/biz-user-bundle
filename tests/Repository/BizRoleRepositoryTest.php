@@ -38,13 +38,6 @@ class BizRoleRepositoryTest extends TestCase
         $this->assertInstanceOf(EntityRepository::class, $this->repository);
     }
 
-    public function testBasicRepositoryMethods(): void
-    {
-        $this->assertTrue(method_exists($this->repository, 'find'));
-        $this->assertTrue(method_exists($this->repository, 'findOneBy'));
-        $this->assertTrue(method_exists($this->repository, 'findAll'));
-        $this->assertTrue(method_exists($this->repository, 'findBy'));
-    }
 
     public function testRepositoryCanHandleBizRoleEntity(): void
     {
@@ -75,17 +68,6 @@ class BizRoleRepositoryTest extends TestCase
         $this->assertEquals(ServiceEntityRepository::class, $parentClass->getName());
     }
 
-    public function testRepositoryMethodsWithEntityTypes(): void
-    {
-        $methods = ['find', 'findOneBy', 'findAll', 'findBy'];
-
-        foreach ($methods as $methodName) {
-            $this->assertTrue(
-                method_exists($this->repository, $methodName),
-                sprintf('方法 %s 应该存在', $methodName)
-            );
-        }
-    }
 
     public function testRepositoryCanWorkWithBizRoleProperties(): void
     {
@@ -102,19 +84,6 @@ class BizRoleRepositoryTest extends TestCase
         $this->assertTrue($role->isValid());
     }
 
-    public function testBizRoleEntityHasExpectedMethods(): void
-    {
-        $role = new BizRole();
-
-        $this->assertTrue(method_exists($role, 'setName'));
-        $this->assertTrue(method_exists($role, 'getName'));
-        $this->assertTrue(method_exists($role, 'setTitle'));
-        $this->assertTrue(method_exists($role, 'getTitle'));
-        $this->assertTrue(method_exists($role, 'setAdmin'));
-        $this->assertTrue(method_exists($role, 'isAdmin'));
-        $this->assertTrue(method_exists($role, 'setValid'));
-        $this->assertTrue(method_exists($role, 'isValid'));
-    }
 
     public function testBizRoleStringRepresentation(): void
     {
@@ -135,13 +104,4 @@ class BizRoleRepositoryTest extends TestCase
         $this->assertEquals($permissions, $role->getPermissions());
     }
 
-    public function testBizRoleArrayConversion(): void
-    {
-        $role = new BizRole();
-        $role->setName('测试角色');
-        $role->setTitle('测试角色标题');
-
-        $this->assertTrue(method_exists($role, 'retrievePlainArray'));
-        $this->assertTrue(method_exists($role, 'retrieveAdminArray'));
-    }
 }

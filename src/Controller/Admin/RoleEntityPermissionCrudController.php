@@ -50,7 +50,7 @@ class RoleEntityPermissionCrudController extends AbstractCrudController
             ->setRequired(true)
             ->autocomplete()
             ->formatValue(function ($value, RoleEntityPermission $entity) {
-                return $entity->getRole() ? 
+                return $entity->getRole() !== null ? 
                     sprintf('%s (%s)', $entity->getRole()->getTitle(), $entity->getRole()->getName()) : 
                     '未分配';
             });

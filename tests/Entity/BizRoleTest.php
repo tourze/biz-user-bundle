@@ -169,7 +169,7 @@ class BizRoleTest extends TestCase
         $users = $this->role->getUsers();
 
         $this->assertInstanceOf(ArrayCollection::class, $users);
-        $this->assertEmpty($users);
+        $this->assertCount(0, $users);
 
         // 添加用户后再测试
         $user = new BizUser();
@@ -238,7 +238,7 @@ class BizRoleTest extends TestCase
         $permissions = $this->role->getDataPermissions();
 
         $this->assertInstanceOf(ArrayCollection::class, $permissions);
-        $this->assertEmpty($permissions);
+        $this->assertCount(0, $permissions);
 
         // 添加权限后再测试
         $permission = new RoleEntityPermission();

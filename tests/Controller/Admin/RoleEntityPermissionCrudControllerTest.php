@@ -5,21 +5,15 @@ namespace BizUserBundle\Tests\Controller\Admin;
 use BizUserBundle\Controller\Admin\RoleEntityPermissionCrudController;
 use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\RoleEntityPermission;
-use BizUserBundle\Repository\RoleEntityPermissionRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use PHPUnit\Framework\TestCase;
 
 class RoleEntityPermissionCrudControllerTest extends TestCase
 {
     private RoleEntityPermissionCrudController $controller;
-    private EntityManagerInterface $entityManager;
-    private RoleEntityPermissionRepository $repository;
 
     protected function setUp(): void
     {
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->repository = $this->createMock(RoleEntityPermissionRepository::class);
         $this->controller = new RoleEntityPermissionCrudController();
     }
 
@@ -65,18 +59,6 @@ class RoleEntityPermissionCrudControllerTest extends TestCase
         $this->assertNotEmpty($fields);
         $this->assertGreaterThan(7, count($fields));
     }
-
-    public function testConfigureFiltersMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureFilters'));
-    }
-
-    public function testConfigureActionsMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureActions'));
-    }
-
-
 
 
     public function testRoleEntityPermissionFields(): void

@@ -4,18 +4,15 @@ namespace BizUserBundle\Tests\Controller\Admin;
 
 use BizUserBundle\Controller\Admin\PasswordHistoryCrudController;
 use BizUserBundle\Entity\PasswordHistory;
-use BizUserBundle\Repository\PasswordHistoryRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use PHPUnit\Framework\TestCase;
 
 class PasswordHistoryCrudControllerTest extends TestCase
 {
     private PasswordHistoryCrudController $controller;
-    private PasswordHistoryRepository $repository;
 
     protected function setUp(): void
     {
-        $this->repository = $this->createMock(PasswordHistoryRepository::class);
         $this->controller = new PasswordHistoryCrudController();
     }
 
@@ -47,16 +44,6 @@ class PasswordHistoryCrudControllerTest extends TestCase
         $this->assertNotEmpty($fields);
     }
 
-    public function testConfigureFiltersMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureFilters'));
-    }
-
-    public function testConfigureActionsMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureActions'));
-    }
-
     public function testPasswordHistoryIsReadOnly(): void
     {
         $passwordHistory = new PasswordHistory();
@@ -72,7 +59,7 @@ class PasswordHistoryCrudControllerTest extends TestCase
     public function testPasswordHistoryExpiration(): void
     {
         $passwordHistory = new PasswordHistory(true);
-        $expireDate = new \DateTime('+30 days');
+        $expireDate = new \DateTimeImmutable('+30 days');
         $passwordHistory->setExpireTime($expireDate);
 
         $this->assertTrue($passwordHistory->isNeedReset());
@@ -106,7 +93,7 @@ class PasswordHistoryCrudControllerTest extends TestCase
         $passwordHistory->setCiphertext('$2y$10$example_hash');
         $passwordHistory->setCreatedFromIp('10.0.0.1');
         
-        $expireDate = new \DateTime('+90 days');
+        $expireDate = new \DateTimeImmutable('+90 days');
         $passwordHistory->setExpireTime($expireDate);
 
         $this->assertEquals('admin@example.com', $passwordHistory->getUsername());

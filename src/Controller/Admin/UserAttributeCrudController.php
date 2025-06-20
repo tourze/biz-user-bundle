@@ -48,7 +48,7 @@ class UserAttributeCrudController extends AbstractCrudController
             ->setRequired(true)
             ->autocomplete()
             ->formatValue(function ($value, UserAttribute $entity) {
-                return $entity->getUser() ? 
+                return $entity->getUser() !== null ? 
                     sprintf('%s (%s)', $entity->getUser()->getNickName(), $entity->getUser()->getUsername()) : 
                     '未分配';
             });

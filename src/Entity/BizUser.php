@@ -65,7 +65,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     #[TrackColumn]
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '昵称'])]
-    private ?string $nickName = '';
+    private string $nickName = '';
 
     #[Assert\Email]
     #[ORM\Column(type: Types::STRING, length: 500, nullable: true, options: ['comment' => '邮箱地址'])]
@@ -144,7 +144,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null) {
             return '(未保存用户)';
         }
 

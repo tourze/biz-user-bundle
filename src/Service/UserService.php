@@ -39,12 +39,12 @@ class UserService
     public function findUserByIdentity(string $identity): ?UserInterface
     {
         $user = $this->userRepository->findOneBy(['valid' => true, 'username' => $identity]);
-        if ($user) {
+        if ($user !== null) {
             return $user;
         }
 
         $user = $this->userRepository->findOneBy(['valid' => true, 'identity' => $identity]);
-        if ($user) {
+        if ($user !== null) {
             return $user;
         }
 
@@ -66,19 +66,19 @@ class UserService
         $result = new ArrayCollection();
 
         $user = $this->userRepository->findOneBy(['valid' => true, 'username' => $identity]);
-        if ($user) {
+        if ($user !== null) {
             $result->add($user);
         }
 
         $user = $this->userRepository->findOneBy(['valid' => true, 'identity' => $identity]);
-        if ($user) {
+        if ($user !== null) {
             $result->add($user);
         }
 
-        if ($_ENV['FIND_USER_BY_NICKNAME'] ?? false) {
+        if (isset($_ENV['FIND_USER_BY_NICKNAME']) && $_ENV['FIND_USER_BY_NICKNAME'] === 'true') {
             $users = $this->userRepository->findBy(['valid' => true, 'nickName' => $identity]);
-            foreach ($users as $user) {
-                $result->add($user);
+            foreach ($users as $nickNameUser) {
+                $result->add($nickNameUser);
             }
         }
 
@@ -89,13 +89,13 @@ class UserService
         $this->eventDispatcher->dispatch($event);
 
         // 进行一次去重
-        $result = [];
+        $uniqueUsers = [];
         foreach ($event->getUsers()->toArray() as $item) {
             /* @var BizUser $item */
-            $result[$item->getUserIdentifier()] = $item;
+            $uniqueUsers[$item->getUserIdentifier()] = $item;
         }
 
-        return array_values($result);
+        return $uniqueUsers;
     }
 
     /**
@@ -118,10 +118,11 @@ class UserService
                 // 遍历其中的成员，看是否是用户，是的话就查找并更新一次
                 $reflection = $meta->getReflectionClass();
                 foreach ($reflection->getProperties(\ReflectionProperty::IS_PROTECTED | \ReflectionProperty::IS_PRIVATE) as $property) {
-                    if (!$property->getType()) {
+                    $type = $property->getType();
+                    if ($type === null) {
                         continue;
                     }
-                    if (BizUser::class !== $property->getType()->getName()) {
+                    if (!$type instanceof \ReflectionNamedType || BizUser::class !== $type->getName()) {
                         continue;
                     }
 

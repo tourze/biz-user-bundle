@@ -396,13 +396,4 @@ class BizUserTest extends TestCase
         return $property->getValue($object);
     }
 
-    /**
-     * 辅助方法：创建带有指定角色值的 BizRole 对象
-     */
-    private function createRoleWithValue(string $value): BizRole
-    {
-        $role = $this->createMock(BizRole::class);
-        $role->method('getValue')->willReturn($value);
-        return $role;
-    }
 }

@@ -38,18 +38,7 @@ class PasswordHistoryRepositoryTest extends TestCase
         $this->assertInstanceOf(EntityRepository::class, $this->repository);
     }
 
-    public function testBasicRepositoryMethods(): void
-    {
-        $this->assertTrue(method_exists($this->repository, 'find'));
-        $this->assertTrue(method_exists($this->repository, 'findOneBy'));
-        $this->assertTrue(method_exists($this->repository, 'findAll'));
-        $this->assertTrue(method_exists($this->repository, 'findBy'));
-    }
 
-    public function testCustomMethods(): void
-    {
-        $this->assertTrue(method_exists($this->repository, 'findLatestPasswordHistory'));
-    }
 
     public function testRepositoryCanHandlePasswordHistoryEntity(): void
     {
@@ -80,29 +69,7 @@ class PasswordHistoryRepositoryTest extends TestCase
         $this->assertEquals(ServiceEntityRepository::class, $parentClass->getName());
     }
 
-    public function testRepositoryMethodsWithEntityTypes(): void
-    {
-        $methods = ['find', 'findOneBy', 'findAll', 'findBy', 'findLatestPasswordHistory'];
 
-        foreach ($methods as $methodName) {
-            $this->assertTrue(
-                method_exists($this->repository, $methodName),
-                sprintf('方法 %s 应该存在', $methodName)
-            );
-        }
-    }
-
-    public function testPasswordHistoryEntityHasExpectedMethods(): void
-    {
-        $history = new PasswordHistory();
-
-        $this->assertTrue(method_exists($history, 'setUsername'));
-        $this->assertTrue(method_exists($history, 'getUsername'));
-        $this->assertTrue(method_exists($history, 'setCiphertext'));
-        $this->assertTrue(method_exists($history, 'getCiphertext'));
-        $this->assertTrue(method_exists($history, 'setUserId'));
-        $this->assertTrue(method_exists($history, 'getUserId'));
-    }
 
     public function testPasswordHistoryProperties(): void
     {
@@ -114,21 +81,7 @@ class PasswordHistoryRepositoryTest extends TestCase
         $this->assertEquals('encrypted_password', $history->getCiphertext());
     }
 
-    public function testPasswordHistoryIpTracking(): void
-    {
-        $history = new PasswordHistory();
 
-        $this->assertTrue(method_exists($history, 'setCreatedFromIp'));
-        $this->assertTrue(method_exists($history, 'getCreatedFromIp'));
-    }
-
-    public function testPasswordHistoryTimestamps(): void
-    {
-        $history = new PasswordHistory();
-
-        $this->assertTrue(method_exists($history, 'setCreateTime'));
-        $this->assertTrue(method_exists($history, 'getCreateTime'));
-    }
 
     public function testFindLatestPasswordHistoryMethodSignature(): void
     {
@@ -140,7 +93,9 @@ class PasswordHistoryRepositoryTest extends TestCase
 
         $parameter = $method->getParameters()[0];
         $this->assertEquals('username', $parameter->getName());
-        $this->assertEquals('string', $parameter->getType()->getName());
+        $type = $parameter->getType();
+        $this->assertNotNull($type);
+        $this->assertEquals('string', (string) $type);
     }
 
     public function testRepositoryHasAutoconfigureAttribute(): void

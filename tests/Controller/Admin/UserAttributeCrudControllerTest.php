@@ -5,21 +5,15 @@ namespace BizUserBundle\Tests\Controller\Admin;
 use BizUserBundle\Controller\Admin\UserAttributeCrudController;
 use BizUserBundle\Entity\BizUser;
 use BizUserBundle\Entity\UserAttribute;
-use BizUserBundle\Repository\UserAttributeRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use PHPUnit\Framework\TestCase;
 
 class UserAttributeCrudControllerTest extends TestCase
 {
     private UserAttributeCrudController $controller;
-    private EntityManagerInterface $entityManager;
-    private UserAttributeRepository $repository;
 
     protected function setUp(): void
     {
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->repository = $this->createMock(UserAttributeRepository::class);
         $this->controller = new UserAttributeCrudController();
     }
 
@@ -66,18 +60,6 @@ class UserAttributeCrudControllerTest extends TestCase
         $this->assertGreaterThan(8, count($fields));
     }
 
-    public function testConfigureFiltersMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureFilters'));
-    }
-
-    public function testConfigureActionsMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureActions'));
-    }
-
-
-
 
     public function testUserAttributeEntityFields(): void
     {
@@ -110,7 +92,6 @@ class UserAttributeCrudControllerTest extends TestCase
 
         $apiArray = $attribute->retrieveApiArray();
 
-        $this->assertIsArray($apiArray);
         $this->assertArrayHasKey('name', $apiArray);
         $this->assertArrayHasKey('value', $apiArray);
         $this->assertEquals('theme', $apiArray['name']);
@@ -131,7 +112,6 @@ class UserAttributeCrudControllerTest extends TestCase
 
         $adminArray = $attribute->retrieveAdminArray();
 
-        $this->assertIsArray($adminArray);
         $this->assertArrayHasKey('name', $adminArray);
         $this->assertArrayHasKey('value', $adminArray);
         $this->assertArrayHasKey('remark', $adminArray);

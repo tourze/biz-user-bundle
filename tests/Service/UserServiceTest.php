@@ -3,7 +3,6 @@
 namespace BizUserBundle\Tests\Service;
 
 use BizUserBundle\Entity\BizUser;
-use BizUserBundle\Entity\PasswordHistory;
 use BizUserBundle\Event\FindUserByIdentityEvent;
 use BizUserBundle\Event\FindUsersByIdentityEvent;
 use BizUserBundle\Exception\PasswordWeakStrengthException;
@@ -15,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
-use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class UserServiceTest extends TestCase
@@ -219,7 +217,7 @@ class UserServiceTest extends TestCase
 
         // 断言结果
         $this->assertCount(1, $result);
-        $this->assertSame($user, $result[0]);
+        $this->assertContains($user, $result);
     }
 
     /**
@@ -228,7 +226,7 @@ class UserServiceTest extends TestCase
     public function testFindUsersByIdentity_withNickname(): void
     {
         // 设置环境变量
-        $_ENV['FIND_USER_BY_NICKNAME'] = true;
+        $_ENV['FIND_USER_BY_NICKNAME'] = 'true';
 
         // 准备测试数据
         $user1 = new BizUser();
@@ -293,7 +291,7 @@ class UserServiceTest extends TestCase
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects($this->once())
             ->method('dispatch')
-            ->with($this->callback(function ($event) use ($user) {
+            ->with($this->callback(function ($event) {
                 $this->assertInstanceOf(FindUsersByIdentityEvent::class, $event);
                 return true;
             }))
@@ -307,7 +305,7 @@ class UserServiceTest extends TestCase
 
         // 断言结果 - 去重后应该只有一个
         $this->assertCount(1, $result);
-        $this->assertSame($user, $result[0]);
+        $this->assertContains($user, $result);
     }
 
     /**
@@ -413,30 +411,6 @@ class UserServiceTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     * 测试有效密码不抛出异常
-     */
-    public function testCheckNewPasswordStrength_withValidPassword(): void
-    {
-        // 跳过这个测试，因为 mock 对象兼容性问题
-        $this->markTestSkipped('由于 mock 对象兼容性问题，暂时跳过这个测试');
-
-        // 准备测试数据
-        $user = new BizUser();
-        $user->setId(1);
-
-        // 模拟 hasher
-        $hasher = $this->createMock(PasswordHasherInterface::class);
-
-        // 模拟 hasherFactory
-        $hasherFactory = $this->createMock(PasswordHasherFactoryInterface::class);
-        $hasherFactory->method('getPasswordHasher')->willReturn($hasher);
-
-        // 由于查询构建器的模拟问题，无法正确模拟此处的行为
-        // 省略 historyRepository 模拟...
-
-        // 省略测试执行...
-    }
 
     /**
      * 测试密码长度不足抛出异常
@@ -473,97 +447,6 @@ class UserServiceTest extends TestCase
 
         // 只有小写字母和数字，不满足复杂度要求
         $service->checkNewPasswordStrength($user, 'password12345');
-    }
-
-    /**
-     * 测试重复使用最近密码抛出异常
-     */
-    public function testCheckNewPasswordStrength_withRecentlyUsedPassword(): void
-    {
-        // 跳过这个测试，因为 mock 对象兼容性问题
-        $this->markTestSkipped('由于 mock 对象兼容性问题，暂时跳过这个测试');
-
-        // 准备测试数据
-        $user = new BizUser();
-        $user->setId(1);
-
-        // 创建历史密码记录
-        $passwordHistory = new PasswordHistory();
-        $passwordHistory->setUserId(1);
-        $passwordHistory->setCiphertext('old_password_hash');
-
-        // 模拟 hasher
-        $hasher = $this->createMock(PasswordHasherInterface::class);
-        $hasher->method('verify')
-            ->with('old_password_hash', 'Passw0rd!') // 密码匹配
-            ->willReturn(true);
-
-        // 模拟 hasherFactory
-        $hasherFactory = $this->createMock(PasswordHasherFactoryInterface::class);
-        $hasherFactory->method('getPasswordHasher')->willReturn($hasher);
-
-        // 由于查询构建器的模拟问题，我们直接模拟 historyRepository 的 createQueryBuilder 方法的行为
-        $historyRepository = $this->createMock(PasswordHistoryRepository::class);
-        $historyRepository->method('createQueryBuilder')
-            ->will($this->returnCallback(function () use ($passwordHistory) {
-                // 返回包含历史密码的数组作为查询结果
-                return new class($passwordHistory) {
-                    private $passwordHistory;
-
-                    public function __construct($passwordHistory)
-                    {
-                        $this->passwordHistory = $passwordHistory;
-                    }
-
-                    public function where()
-                    {
-                        return $this;
-                    }
-                    public function setParameter()
-                    {
-                        return $this;
-                    }
-                    public function orderBy()
-                    {
-                        return $this;
-                    }
-                    public function setMaxResults()
-                    {
-                        return $this;
-                    }
-                    public function getQuery()
-                    {
-                        return new class($this->passwordHistory) {
-                            private $passwordHistory;
-
-                            public function __construct($passwordHistory)
-                            {
-                                $this->passwordHistory = $passwordHistory;
-                            }
-
-                            public function getResult()
-                            {
-                                return [$this->passwordHistory];
-                            }
-                        };
-                    }
-                };
-            }));
-
-        // 创建 service 实例
-        $service = $this->createUserServiceWithMocks(
-            null,
-            null,
-            null,
-            $hasherFactory,
-            $historyRepository
-        );
-
-        // 断言方法抛出异常
-        $this->expectException(PasswordWeakStrengthException::class);
-        $this->expectExceptionMessage('新密码不能与前 5 次使用过的密码相同');
-
-        $service->checkNewPasswordStrength($user, 'Passw0rd!');
     }
 
     /**

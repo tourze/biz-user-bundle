@@ -65,10 +65,10 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     private ?string $menuJson = '';
 
     /**
-     * @var array<string>|null
+     * @var array<string>
      */
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '要排除的权限'])]
-    private ?array $excludePermissions = [];
+    private array $excludePermissions = [];
 
     /**
      * @var array<string>|null
@@ -242,7 +242,7 @@ class BizRole implements \Stringable, PlainArrayInterface, AdminArrayInterface
     public function renderPermissionList(): array
     {
         $res = [];
-        foreach ($this->getPermissions() ?? [] as $permission) {
+        foreach ($this->getPermissions() as $permission) {
             $res[] = [
                 'text' => $permission,
                 'fontStyle' => ['fontSize' => '12px'],

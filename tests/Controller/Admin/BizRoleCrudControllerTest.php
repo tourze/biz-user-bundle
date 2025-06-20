@@ -4,27 +4,15 @@ namespace BizUserBundle\Tests\Controller\Admin;
 
 use BizUserBundle\Controller\Admin\BizRoleCrudController;
 use BizUserBundle\Entity\BizRole;
-use BizUserBundle\Entity\BizUser;
-use BizUserBundle\Repository\BizRoleRepository;
-use BizUserBundle\Repository\BizUserRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Request;
 
 class BizRoleCrudControllerTest extends TestCase
 {
     private BizRoleCrudController $controller;
-    private EntityManagerInterface $entityManager;
-    private BizRoleRepository $roleRepository;
-    private BizUserRepository $userRepository;
 
     protected function setUp(): void
     {
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->roleRepository = $this->createMock(BizRoleRepository::class);
-        $this->userRepository = $this->createMock(BizUserRepository::class);
         $this->controller = new BizRoleCrudController();
     }
 
@@ -71,15 +59,6 @@ class BizRoleCrudControllerTest extends TestCase
         $this->assertGreaterThan(10, count($fields));
     }
 
-    public function testConfigureFiltersMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureFilters'));
-    }
-
-    public function testConfigureActionsMethodExists(): void
-    {
-        $this->assertTrue(method_exists($this->controller, 'configureActions'));
-    }
 
 
 

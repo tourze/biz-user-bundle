@@ -24,7 +24,7 @@ class PasswordHistoryTest extends TestCase
         $this->assertEquals('hashed_password_123', $this->passwordHistory->getCiphertext());
 
         // 测试过期时间
-        $expireTime = new \DateTime('2024-12-31 23:59:59');
+        $expireTime = new \DateTimeImmutable('2024-12-31 23:59:59');
         $this->passwordHistory->setExpireTime($expireTime);
         $this->assertSame($expireTime, $this->passwordHistory->getExpireTime());
 
@@ -121,7 +121,7 @@ class PasswordHistoryTest extends TestCase
      */
     public function testSetExpireTime(): void
     {
-        $expireTime = new \DateTime('2025-01-01 00:00:00');
+        $expireTime = new \DateTimeImmutable('2025-01-01 00:00:00');
         $result = $this->passwordHistory->setExpireTime($expireTime);
 
         // 检查返回值是自身（用于链式调用）
@@ -293,12 +293,12 @@ class PasswordHistoryTest extends TestCase
     public function testExpireTime_withBoundaryValues(): void
     {
         // 测试最小时间
-        $minTime = new \DateTime('1970-01-01 00:00:00');
+        $minTime = new \DateTimeImmutable('1970-01-01 00:00:00');
         $this->passwordHistory->setExpireTime($minTime);
         $this->assertEquals($minTime, $this->passwordHistory->getExpireTime());
 
         // 测试最大时间
-        $maxTime = new \DateTime('2038-01-19 03:14:07');
+        $maxTime = new \DateTimeImmutable('2038-01-19 03:14:07');
         $this->passwordHistory->setExpireTime($maxTime);
         $this->assertEquals($maxTime, $this->passwordHistory->getExpireTime());
     }

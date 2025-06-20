@@ -61,7 +61,7 @@ class UserAttribute implements \Stringable, ApiArrayInterface, AdminArrayInterfa
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null) {
             return '';
         }
 
