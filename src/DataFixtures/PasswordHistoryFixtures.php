@@ -62,13 +62,11 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
                 ['password' => "user{$i}pass123!", 'days_ago' => rand(30, 120), 'need_reset' => false],
             ];
 
-            // 某些用户有多次密码修改记录
-            if ($i <= 5) {
-                $passwordHistories[] = ['password' => "user{$i}pass456@", 'days_ago' => rand(15, 29), 'need_reset' => false];
-            }
+            // 某些用户有多次密码修改记录（所有用户都有）
+            $passwordHistories[] = ['password' => "user{$i}pass456@", 'days_ago' => rand(15, 29), 'need_reset' => false];
 
             // 某些用户需要重置密码
-            if ($i === 3 || $i === 7) {
+            if ($i === 3) {
                 $passwordHistories[] = ['password' => "temp{$i}pass789#", 'days_ago' => rand(1, 14), 'need_reset' => true];
             }
 
