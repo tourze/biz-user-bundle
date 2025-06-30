@@ -122,14 +122,20 @@ class BizUserTest extends TestCase
         $roles = $this->user->getRoles();
         $this->assertContains('ROLE_USER', $roles);
 
-        // 由于 BizRole::getValue 方法可能不存在，直接添加具有角色的用户模拟对象
-        $rolesMock = ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_MANAGER'];
-        $userMock = $this->createMock(BizUser::class);
-        $userMock->method('getRoles')->willReturn($rolesMock);
-
-        $this->assertContains('ROLE_ADMIN', $userMock->getRoles());
-        $this->assertContains('ROLE_USER', $userMock->getRoles());
-        $this->assertContains('ROLE_MANAGER', $userMock->getRoles());
+        // 测试添加角色后的情况
+        $adminRole = new BizRole();
+        $adminRole->setName('ROLE_ADMIN');
+        
+        $managerRole = new BizRole();
+        $managerRole->setName('ROLE_MANAGER');
+        
+        $this->user->addAssignRole($adminRole);
+        $this->user->addAssignRole($managerRole);
+        
+        $roles = $this->user->getRoles();
+        $this->assertContains('ROLE_ADMIN', $roles);
+        $this->assertContains('ROLE_MANAGER', $roles);
+        // ROLE_USER 只在没有任何角色时自动添加，这里已有角色所以不会包含 ROLE_USER
     }
 
     /**

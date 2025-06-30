@@ -11,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 class BizUserRepositoryTest extends TestCase
 {
-    private BizUserRepository $repository;
     private ManagerRegistry $registry;
     private EntityManagerInterface $entityManager;
 
@@ -23,17 +22,6 @@ class BizUserRepositoryTest extends TestCase
         // 设置 getManager 方法返回模拟的 EntityManager
         $this->registry->method('getManager')->willReturn($this->entityManager);
         $this->registry->method('getManagerForClass')->willReturn($this->entityManager);
-
-        $this->repository = new BizUserRepository($this->registry);
-
-        // 注入EntityManager（不再使用反射）
-        $this->repository = $this->getMockBuilder(BizUserRepository::class)
-            ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['getEntityManager'])
-            ->getMock();
-
-        $this->repository->method('getEntityManager')
-            ->willReturn($this->entityManager);
     }
 
     /**
@@ -47,22 +35,32 @@ class BizUserRepositoryTest extends TestCase
         $user->setUsername('test_user');
         $user->setValid(true);
 
-        // 模拟 findOneBy 方法
-        $this->repository = $this->getMockBuilder(BizUserRepository::class)
-            ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['findOneBy', 'getEntityManager'])
-            ->getMock();
-
-        $this->repository->method('getEntityManager')
-            ->willReturn($this->entityManager);
-
-        $this->repository->expects($this->once())
-            ->method('findOneBy')
-            ->with(['id' => '123', 'valid' => true])
-            ->willReturn($user);
+        // 创建一个部分模拟，只模拟 findOneBy 方法
+        $repository = new class($this->registry) extends BizUserRepository {
+            private ?BizUser $mockUser = null;
+            private array $expectedCriteria = [];
+            
+            public function setMockUser(?BizUser $user): void {
+                $this->mockUser = $user;
+            }
+            
+            public function setExpectedCriteria(array $criteria): void {
+                $this->expectedCriteria = $criteria;
+            }
+            
+            public function findOneBy(array $criteria, ?array $orderBy = null): ?BizUser {
+                if ($criteria === $this->expectedCriteria) {
+                    return $this->mockUser;
+                }
+                return null;
+            }
+        };
+        
+        $repository->setExpectedCriteria(['id' => '123', 'valid' => true]);
+        $repository->setMockUser($user);
 
         // 执行测试
-        $result = $this->repository->loadUserByIdentifier('123');
+        $result = $repository->loadUserByIdentifier('123');
 
         // 断言结果
         $this->assertSame($user, $result);
@@ -78,19 +76,24 @@ class BizUserRepositoryTest extends TestCase
         $user->setUsername('test_user');
         $user->setValid(true);
 
-        // 由于 loadUserByIdentifier 实现可能有变化，我们直接模拟这个方法
-        $repository = $this->getMockBuilder(BizUserRepository::class)
-            ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['loadUserByIdentifier', 'getEntityManager'])
-            ->getMock();
-
-        $repository->method('getEntityManager')
-            ->willReturn($this->entityManager);
-
-        $repository->expects($this->once())
-            ->method('loadUserByIdentifier')
-            ->with('test_user')
-            ->willReturn($user);
+        // 创建一个部分模拟，只模拟 findOneBy 方法
+        $repository = new class($this->registry) extends BizUserRepository {
+            private ?BizUser $mockUser = null;
+            
+            public function setMockUser(?BizUser $user): void {
+                $this->mockUser = $user;
+            }
+            
+            public function findOneBy(array $criteria, ?array $orderBy = null): ?BizUser {
+                // 直接检查用户名，因为 'test_user' 不是数字，不会作为 ID 查询
+                if ($criteria === ['username' => 'test_user', 'valid' => true]) {
+                    return $this->mockUser;
+                }
+                return null;
+            }
+        };
+        
+        $repository->setMockUser($user);
 
         // 执行测试
         $result = $repository->loadUserByIdentifier('test_user');
@@ -104,19 +107,13 @@ class BizUserRepositoryTest extends TestCase
      */
     public function testLoadUserByIdentifier_withInvalidUser(): void
     {
-        // 由于 loadUserByIdentifier 实现可能有变化，我们直接模拟这个方法
-        $repository = $this->getMockBuilder(BizUserRepository::class)
-            ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['loadUserByIdentifier', 'getEntityManager'])
-            ->getMock();
-
-        $repository->method('getEntityManager')
-            ->willReturn($this->entityManager);
-
-        $repository->expects($this->once())
-            ->method('loadUserByIdentifier')
-            ->with('non_existing')
-            ->willReturn(null);
+        // 创建一个部分模拟，只模拟 findOneBy 方法
+        $repository = new class($this->registry) extends BizUserRepository {
+            public function findOneBy(array $criteria, ?array $orderBy = null): ?BizUser {
+                // 无论什么条件都返回null，模拟用户不存在
+                return null;
+            }
+        };
 
         // 执行测试
         $result = $repository->loadUserByIdentifier('non_existing');
@@ -187,16 +184,20 @@ class BizUserRepositoryTest extends TestCase
      */
     public function testEm_returnsEntityManager(): void
     {
-        // 创建一个新的模拟对象，重写 em 方法
-        $repository = $this->getMockBuilder(BizUserRepository::class)
-            ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['getEntityManager'])
-            ->getMock();
-
-        $repository->expects($this->once())
-            ->method('getEntityManager')
-            ->willReturn($this->entityManager);
-
+        // 创建一个部分模拟，只模拟 getEntityManager 方法
+        $repository = new class($this->registry) extends BizUserRepository {
+            private EntityManagerInterface $em;
+            
+            public function setEntityManager(EntityManagerInterface $em): void {
+                $this->em = $em;
+            }
+            
+            protected function getEntityManager(): EntityManagerInterface {
+                return $this->em;
+            }
+        };
+        
+        $repository->setEntityManager($this->entityManager);
         $result = $repository->em();
 
         // 断言结果是 EntityManagerInterface 的实例

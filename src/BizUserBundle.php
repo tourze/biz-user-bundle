@@ -8,7 +8,13 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\BundleDependency\BundleDependencyInterface;
+use Tourze\DoctrineIpBundle\DoctrineIpBundle;
 use Tourze\DoctrineResolveTargetEntityBundle\DependencyInjection\Compiler\ResolveTargetEntityPass;
+use Tourze\DoctrineResolveTargetEntityBundle\DoctrineResolveTargetEntityBundle;
+use Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle;
+use Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle;
+use Tourze\DoctrineTrackBundle\DoctrineTrackBundle;
+use Tourze\DoctrineUserBundle\DoctrineUserBundle;
 
 class BizUserBundle extends Bundle implements BundleDependencyInterface
 {
@@ -29,9 +35,12 @@ class BizUserBundle extends Bundle implements BundleDependencyInterface
     public static function getBundleDependencies(): array
     {
         return [
-            \Tourze\DoctrineResolveTargetEntityBundle\DoctrineResolveTargetEntityBundle::class => ['all' => true],
-            \Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle::class => ['all' => true],
-            \Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle::class => ['all' => true],
+            DoctrineResolveTargetEntityBundle::class => ['all' => true],
+            DoctrineTimestampBundle::class => ['all' => true],
+            DoctrineSnowflakeBundle::class => ['all' => true],
+            DoctrineIpBundle::class => ['all' => true],
+            DoctrineTrackBundle::class => ['all' => true],
+            DoctrineUserBundle::class => ['all' => true],
         ];
     }
 }

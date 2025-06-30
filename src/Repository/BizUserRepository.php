@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Tourze\UserServiceContracts\UserManagerInterface;
 
 /**
  * This custom Doctrine repository is empty because so far we don't need any custom
@@ -32,7 +33,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 #[Autoconfigure(public: true)]
 #[AsAlias(id: UserLoaderInterface::class)]
-class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
+#[AsAlias(id: UserManagerInterface::class)]
+class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface, UserManagerInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -103,5 +105,18 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
     public function em(): EntityManagerInterface
     {
         return $this->getEntityManager();
+    }
+
+    public function createUser(string $userIdentifier, ?string $nickName = null, ?string $avatarUrl = null): UserInterface
+    {
+        $user = new BizUser();
+        $user->setUsername($userIdentifier);
+        if ($nickName !== null) {
+            $user->setNickName($nickName);
+        }
+        if ($avatarUrl !== null) {
+            $user->setAvatar($avatarUrl);
+        }
+        return $user;
     }
 }

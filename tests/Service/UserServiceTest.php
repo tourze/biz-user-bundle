@@ -454,18 +454,16 @@ class UserServiceTest extends TestCase
      */
     public function testIsAdmin_withAdminUser(): void
     {
-        // 准备测试数据 - 为了匹配实际代码行为，需要修改预期值
+        // 准备测试数据
+        $adminRole = $this->createMock(\BizUserBundle\Entity\BizRole::class);
+        $adminRole->method('isValid')->willReturn(true);
+        $adminRole->method('isAdmin')->willReturn(true);
+        
         $user = $this->createMock(BizUser::class);
-        $user->method('getRoles')->willReturn(['ROLE_ADMIN', 'ROLE_USER']);
+        $user->method('getAssignRoles')->willReturn([$adminRole]);
 
-        // 模拟 UserService 类
-        $service = $this->getMockBuilder(UserService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['isAdmin'])
-            ->getMock();
-
-        // 设置模拟方法的返回值
-        $service->method('isAdmin')->willReturn(true);
+        // 创建真实的 UserService 实例
+        $service = $this->createUserServiceWithMocks();
 
         // 执行方法并断言结果
         $this->assertTrue($service->isAdmin($user));

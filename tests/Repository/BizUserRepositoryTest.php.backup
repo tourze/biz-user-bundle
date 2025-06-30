@@ -1,0 +1,300 @@
+<?php
+
+namespace BizUserBundle\Tests\Repository;
+
+use BizUserBundle\Entity\BizUser;
+use BizUserBundle\Exception\UsernameInvalidException;
+use BizUserBundle\Repository\BizUserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\TestCase;
+
+class BizUserRepositoryTest extends TestCase
+{
+    private BizUserRepository $repository;
+    private ManagerRegistry $registry;
+    private EntityManagerInterface $entityManager;
+    private QueryBuilder $queryBuilder;
+    private Query $query;
+
+    protected function setUp(): void
+    {
+        $this->registry = $this->createMock(ManagerRegistry::class);
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->queryBuilder = $this->createMock(QueryBuilder::class);
+        $this->query = $this->createMock(Query::class);
+
+        // 设置 getManager 方法返回模拟的 EntityManager
+        $this->registry->method('getManager')->willReturn($this->entityManager);
+        $this->registry->method('getManagerForClass')->willReturn($this->entityManager);
+
+        $this->repository = new BizUserRepository($this->registry);
+    }
+
+    /**
+     * 测试通过数字ID加载用户
+     */
+    public function testLoadUserByIdentifier_withNumericId(): void
+    {
+        // 准备测试数据
+        $user = new BizUser();
+        $user->setId(123);
+        $user->setUsername('test_user');
+        $user->setValid(true);
+
+        // 模拟 createQueryBuilder
+        $this->entityManager->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('select')
+            ->with('u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('from')
+            ->with(BizUser::class, 'u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('where')
+            ->with('u.id = :identifier AND u.valid = :valid')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->withConsecutive(
+                ['identifier', '123'],
+                ['valid', true]
+            )
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($this->query);
+
+        $this->query->expects($this->once())
+            ->method('getOneOrNullResult')
+            ->willReturn($user);
+
+        // 执行测试
+        $result = $this->repository->loadUserByIdentifier('123');
+
+        // 断言
+        $this->assertSame($user, $result);
+    }
+
+    /**
+     * 测试通过用户名加载用户
+     */
+    public function testLoadUserByIdentifier_withUsername(): void
+    {
+        // 准备测试数据
+        $user = new BizUser();
+        $user->setUsername('test_user');
+        $user->setValid(true);
+
+        // 模拟 createQueryBuilder
+        $this->entityManager->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('select')
+            ->with('u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('from')
+            ->with(BizUser::class, 'u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('where')
+            ->with('u.username = :identifier AND u.valid = :valid')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->withConsecutive(
+                ['identifier', 'test_user'],
+                ['valid', true]
+            )
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($this->query);
+
+        $this->query->expects($this->once())
+            ->method('getOneOrNullResult')
+            ->willReturn($user);
+
+        // 执行测试
+        $result = $this->repository->loadUserByIdentifier('test_user');
+
+        // 断言
+        $this->assertSame($user, $result);
+    }
+
+    /**
+     * 测试查找未被使用的用户
+     */
+    public function testFindNotInUser(): void
+    {
+        $notInIds = [1, 2, 3];
+        $expectedUsers = [
+            new BizUser(),
+            new BizUser(),
+        ];
+
+        // 模拟 createQueryBuilder
+        $this->entityManager->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('select')
+            ->with('u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('from')
+            ->with(BizUser::class, 'u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('where')
+            ->with('u.id NOT IN (:ids)')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('ids', $notInIds)
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($this->query);
+
+        $this->query->expects($this->once())
+            ->method('getResult')
+            ->willReturn($expectedUsers);
+
+        // 执行测试
+        $result = $this->repository->findNotInUser($notInIds);
+
+        // 断言
+        $this->assertSame($expectedUsers, $result);
+    }
+
+    /**
+     * 测试通过用户名查找用户，用户名为空时抛出异常
+     */
+    public function testFindByUsername_withEmptyUsername(): void
+    {
+        $this->expectException(UsernameInvalidException::class);
+        $this->expectExceptionMessage('Invalid username');
+
+        $this->repository->findByUsername('');
+    }
+
+    /**
+     * 测试通过用户名查找用户
+     */
+    public function testFindByUsername_withValidUsername(): void
+    {
+        $username = 'test_user';
+        $user = new BizUser();
+        $user->setUsername($username);
+
+        // 模拟 createQueryBuilder
+        $this->entityManager->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('select')
+            ->with('u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('from')
+            ->with(BizUser::class, 'u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('where')
+            ->with('u.username = :username')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('username', $username)
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($this->query);
+
+        $this->query->expects($this->once())
+            ->method('getOneOrNullResult')
+            ->willReturn($user);
+
+        // 执行测试
+        $result = $this->repository->findByUsername($username);
+
+        // 断言
+        $this->assertSame($user, $result);
+    }
+
+    /**
+     * 测试通过用户名查找用户，用户不存在时返回null
+     */
+    public function testFindByUsername_userNotFound(): void
+    {
+        $username = 'non_existent_user';
+
+        // 模拟 createQueryBuilder
+        $this->entityManager->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('select')
+            ->with('u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('from')
+            ->with(BizUser::class, 'u')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('where')
+            ->with('u.username = :username')
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('setParameter')
+            ->with('username', $username)
+            ->willReturn($this->queryBuilder);
+
+        $this->queryBuilder->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($this->query);
+
+        $this->query->expects($this->once())
+            ->method('getOneOrNullResult')
+            ->willReturn(null);
+
+        // 执行测试
+        $result = $this->repository->findByUsername($username);
+
+        // 断言
+        $this->assertNull($result);
+    }
+}

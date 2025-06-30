@@ -23,11 +23,11 @@ class AdminMenu implements MenuProviderInterface
 
     public function __invoke(ItemInterface $item): void
     {
-        if (null === $item->getChild('基础用户模块')) {
-            $item->addChild('基础用户模块');
+        if (null === $item->getChild('用户模块')) {
+            $item->addChild('用户模块');
         }
 
-        $userMenu = $item->getChild('基础用户模块');
+        $userMenu = $item->getChild('用户模块');
         
         // 用户管理菜单
         $userMenu->addChild('用户管理')

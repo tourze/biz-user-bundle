@@ -32,13 +32,13 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     use TimestampableAware;
     public const TABLE_NAME = 'biz_user';
 
-    #[Groups(['restful_read', 'api_tree', 'admin_curd', 'api_list'])]
+    #[Groups(groups: ['restful_read', 'api_tree', 'admin_curd', 'api_list'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
     private ?int $id = 0;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '头像'])]
     private ?string $avatar = null;
@@ -50,7 +50,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * @var string 一般可以用来表示 openid
      */
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50)]
     #[ORM\Column(type: Types::STRING, length: 120, unique: true, options: ['comment' => '用户名'])]
@@ -61,7 +61,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     #[ORM\Column(type: Types::STRING, length: 64, nullable: true, options: ['comment' => '用户唯一标志'])]
     private ?string $identity = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[TrackColumn]
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '昵称'])]
@@ -92,7 +92,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * @var Collection<UserAttribute>
      */
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\OneToMany(targetEntity: UserAttribute::class, mappedBy: 'user', cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true, indexBy: 'name')]
     private Collection $attributes;
 
@@ -120,7 +120,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     #[IndexColumn]
     #[TrackColumn]
-    #[Groups(['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
+    #[Groups(groups: ['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
