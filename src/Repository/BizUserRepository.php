@@ -9,10 +9,12 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Tourze\BizRoleBundle\Repository\BizRoleRepository;
 use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 use Tourze\UserServiceContracts\UserManagerInterface;
 
@@ -28,7 +30,11 @@ use Tourze\UserServiceContracts\UserManagerInterface;
 #[AsRepository(entityClass: BizUser::class)]
 class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface, UserManagerInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(
+        ManagerRegistry $registry,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly BizRoleRepository $roleRepository,
+    )
     {
         parent::__construct($registry, BizUser::class);
     }
@@ -144,7 +150,7 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
         }, $results);
     }
 
-    public function createUser(string $userIdentifier, ?string $nickName = null, ?string $avatarUrl = null): UserInterface
+    public function createUser(string $userIdentifier, ?string $nickName = null, ?string $avatarUrl = null, ?string $password = null, array $roles = []): UserInterface
     {
         $user = new BizUser();
         $user->setUsername($userIdentifier);
@@ -153,6 +159,16 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
         }
         if (null !== $avatarUrl) {
             $user->setAvatar($avatarUrl);
+        }
+        if (null !== $password) {
+            $user->setPasswordHash($this->passwordHasher->hashPassword($user, $password));
+        }
+        foreach ($roles as $role) {
+            $user->addAssignRole($this->roleRepository->findOrCreate($role));
+        }
+        // 如果用户名是邮箱格式，也设置邮箱
+        if (filter_var($userIdentifier, FILTER_VALIDATE_EMAIL)) {
+            $user->setEmail($userIdentifier);
         }
         $user->setValid(true);
 
