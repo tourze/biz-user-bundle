@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace BizUserBundle\DataFixtures;
 
-use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\BizUser;
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -12,26 +11,29 @@ use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Tourze\BizRoleBundle\DataFixtures\BizRoleFixtures;
+use Tourze\BizRoleBundle\Entity\BizRole;
 use Tourze\UserServiceContracts\UserServiceConstants;
 
 /**
  * 用户数据填充
  */
+#[When(env: 'test')]
+#[When(env: 'dev')]
 class BizUserFixtures extends Fixture implements FixtureGroupInterface, DependentFixtureInterface
 {
     // 常量定义引用名称
     public const ADMIN_USER_REFERENCE = 'admin-user';
     public const MODERATOR_USER_REFERENCE = 'moderator-user';
-    public const NORMAL_USER_REFERENCE_PREFIX = 'normal-user-';
 
     // 密码默认值
     private const DEFAULT_PASSWORD = '1234qwqw';
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
-    )
-    {
+    ) {
     }
 
     public function load(ObjectManager $manager): void
@@ -41,7 +43,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         // 创建管理员用户
         $adminUser = new BizUser();
         $adminUser->setUsername('admin');
-        $adminUser->setEmail('admin@example.com');
+        $adminUser->setEmail('admin@test.local');
         $adminUser->addAssignRole($this->getReference(BizRoleFixtures::ADMIN_ROLE_REFERENCE, BizRole::class));
         $adminUser->setNickName('系统管理员');
         $adminUser->setMobile('13800000001');
@@ -56,7 +58,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         // 创建内容审核员用户
         $moderatorUser = new BizUser();
         $moderatorUser->setUsername('moderator');
-        $moderatorUser->setEmail('moderator@example.com');
+        $moderatorUser->setEmail('moderator@test.local');
         $moderatorUser->addAssignRole($this->getReference(BizRoleFixtures::MODERATOR_ROLE_REFERENCE, BizRole::class));
         $moderatorUser->setNickName('内容审核员');
         $moderatorUser->setMobile('13800000002');
@@ -71,7 +73,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         // 创建一些特殊角色的用户
         $contentManagerUser = new BizUser();
         $contentManagerUser->setUsername('content_manager');
-        $contentManagerUser->setEmail('content_manager@example.com');
+        $contentManagerUser->setEmail('content_manager@test.local');
         $contentManagerUser->addAssignRole($this->getReference(BizRoleFixtures::CONTENT_MANAGER_ROLE_REFERENCE, BizRole::class));
         $contentManagerUser->setNickName('内容管理员');
         $contentManagerUser->setMobile('13800000003');
@@ -83,7 +85,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
 
         $reportViewerUser = new BizUser();
         $reportViewerUser->setUsername('report_viewer');
-        $reportViewerUser->setEmail('report_viewer@example.com');
+        $reportViewerUser->setEmail('report_viewer@test.local');
         $reportViewerUser->addAssignRole($this->getReference(BizRoleFixtures::REPORT_VIEWER_ROLE_REFERENCE, BizRole::class));
         $reportViewerUser->setNickName('报告查看者');
         $reportViewerUser->setMobile('13800000004');
@@ -95,7 +97,7 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
 
         $analystUser = new BizUser();
         $analystUser->setUsername('analyst');
-        $analystUser->setEmail('analyst@example.com');
+        $analystUser->setEmail('analyst@test.local');
         $analystUser->addAssignRole($this->getReference(BizRoleFixtures::ANALYST_ROLE_REFERENCE, BizRole::class));
         $analystUser->setNickName('数据分析师');
         $analystUser->setMobile('13800000005');
@@ -105,24 +107,24 @@ class BizUserFixtures extends Fixture implements FixtureGroupInterface, Dependen
         $analystUser->setUpdateTime(CarbonImmutable::now()->modify('-22 days'));
         $manager->persist($analystUser);
 
-        // 创建普通用户（减少到5个以加快开发环境加载速度）
-        for ($i = 1; $i <= 5; $i++) {
+        // 创建普通用户
+        for ($i = 1; $i <= 10; ++$i) {
             $randomDays = rand(1, 20);
             $createTime = CarbonImmutable::now()->modify('-' . $randomDays . ' days');
 
             $user = new BizUser();
             $user->setUsername('user' . $i);
-            $user->setEmail('user' . $i . '@example.com');
+            $user->setEmail('user' . $i . '@test.local');
             $user->addAssignRole($this->getReference(BizRoleFixtures::USER_ROLE_REFERENCE, BizRole::class));
             $user->setNickName($faker->name());
-            $user->setMobile('138' . str_pad((string)$i, 8, '0', STR_PAD_LEFT));
+            $user->setMobile('138' . str_pad((string) $i, 8, '0', STR_PAD_LEFT));
             $user->setPasswordHash($this->passwordHasher->hashPassword($user, self::DEFAULT_PASSWORD));
             $user->setValid(true);
             $user->setCreateTime($createTime);
             $user->setUpdateTime($createTime);
 
             $manager->persist($user);
-            $this->addReference(self::NORMAL_USER_REFERENCE_PREFIX . $i, $user);
+            $this->addReference(UserServiceConstants::NORMAL_USER_REFERENCE_PREFIX . $i, $user);
             $this->addReference("user-{$i}", $user);
         }
 

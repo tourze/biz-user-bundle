@@ -2,57 +2,187 @@
 
 namespace BizUserBundle\Tests\Service;
 
+use BizUserBundle\Entity\BizUser;
+use BizUserBundle\Entity\PasswordHistory;
 use BizUserBundle\Service\AdminMenu;
 use Knp\Menu\ItemInterface;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\EasyAdminMenuBundle\Service\LinkGeneratorInterface;
+use Tourze\EasyAdminMenuBundle\Service\MenuProviderInterface;
+use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminMenuTestCase;
 
-class AdminMenuTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(AdminMenu::class)]
+#[RunTestsInSeparateProcesses]
+final class AdminMenuTest extends AbstractEasyAdminMenuTestCase
 {
     private AdminMenu $adminMenu;
+
     private LinkGeneratorInterface $linkGenerator;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
         $this->linkGenerator = $this->createMock(LinkGeneratorInterface::class);
-        $this->adminMenu = new AdminMenu($this->linkGenerator);
+
+        // 在容器中替换 LinkGeneratorInterface 服务
+        self::getContainer()->set(LinkGeneratorInterface::class, $this->linkGenerator);
+
+        // 通过服务容器获取 AdminMenu
+        $this->adminMenu = self::getService(AdminMenu::class);
     }
 
-    public function testInvoke(): void
+    public function testServiceCreation(): void
     {
-        $item = $this->createMock(ItemInterface::class);
-        $userMenu = $this->createMock(ItemInterface::class);
-        
-        // 设置期望的行为 - getChild 会被调用两次
-        $item->expects($this->exactly(2))
+        $adminMenu = self::getService(AdminMenu::class);
+        $this->assertInstanceOf(AdminMenu::class, $adminMenu);
+    }
+
+    public function testImplementsMenuProviderInterface(): void
+    {
+        $adminMenu = self::getService(AdminMenu::class);
+        $this->assertInstanceOf(MenuProviderInterface::class, $adminMenu);
+    }
+
+    public function testInvokeShouldBeCallable(): void
+    {
+        $adminMenu = self::getService(AdminMenu::class);
+        $reflection = new \ReflectionClass($adminMenu);
+        $this->assertTrue($reflection->hasMethod('__invoke'));
+    }
+
+    public function testInvokeAddsUserMenu(): void
+    {
+        $this->assertInstanceOf(AdminMenu::class, $this->adminMenu);
+
+        $mainItem = $this->createMock(ItemInterface::class);
+        $userModuleItem = $this->createMock(ItemInterface::class);
+        $userMenuItem = $this->createMock(ItemInterface::class);
+        $passwordMenuItem = $this->createMock(ItemInterface::class);
+
+        // 模拟LinkGenerator行为
+        $this->linkGenerator->expects($this->exactly(2))
+            ->method('getCurdListPage')
+            ->willReturnMap([
+                [BizUser::class, '/admin/bizuser/list'],
+                [PasswordHistory::class, '/admin/passwordhistory/list'],
+            ])
+        ;
+
+        // 第一次调用getChild返回null，第二次返回已创建的菜单项
+        $mainItem->expects($this->exactly(2))
             ->method('getChild')
             ->with('用户模块')
-            ->willReturnOnConsecutiveCalls(null, $userMenu);
-            
-        $item->expects($this->once())
+            ->willReturnOnConsecutiveCalls(null, $userModuleItem)
+        ;
+
+        // 创建用户模块父菜单
+        $mainItem->expects($this->once())
             ->method('addChild')
             ->with('用户模块')
-            ->willReturn($userMenu);
-            
-        // 设置 linkGenerator 的期望返回值
-        $this->linkGenerator->expects($this->exactly(5))
-            ->method('getCurdListPage')
-            ->willReturn('/admin/list');
-            
-        // 设置 userMenu 的期望行为
-        $userMenu->expects($this->exactly(5))
+            ->willReturn($userModuleItem)
+        ;
+
+        // 添加两个子菜单
+        $userModuleItem->expects($this->exactly(2))
             ->method('addChild')
-            ->willReturnSelf();
-        
-        $userMenu->expects($this->exactly(5))
+            ->with(self::logicalOr('用户管理', '密码历史记录'))
+            ->willReturnOnConsecutiveCalls($userMenuItem, $passwordMenuItem)
+        ;
+
+        // 设置用户管理菜单的URI和图标
+        $userMenuItem->expects($this->once())
             ->method('setUri')
-            ->willReturnSelf();
-            
-        $userMenu->expects($this->exactly(5))
+            ->with('/admin/bizuser/list')
+            ->willReturn($userMenuItem)
+        ;
+
+        $userMenuItem->expects($this->once())
             ->method('setAttribute')
-            ->willReturnSelf();
-        
-        // 执行测试
-        ($this->adminMenu)($item);
+            ->with('icon', 'fas fa-users')
+            ->willReturn($userMenuItem)
+        ;
+
+        // 设置密码历史记录菜单的URI和图标
+        $passwordMenuItem->expects($this->once())
+            ->method('setUri')
+            ->with('/admin/passwordhistory/list')
+            ->willReturn($passwordMenuItem)
+        ;
+
+        $passwordMenuItem->expects($this->once())
+            ->method('setAttribute')
+            ->with('icon', 'fas fa-key')
+            ->willReturn($passwordMenuItem)
+        ;
+
+        $this->adminMenu->__invoke($mainItem);
+    }
+
+    public function testInvokeWithExistingUserMenu(): void
+    {
+        $this->assertInstanceOf(AdminMenu::class, $this->adminMenu);
+
+        $mainItem = $this->createMock(ItemInterface::class);
+        $userModuleItem = $this->createMock(ItemInterface::class);
+        $userMenuItem = $this->createMock(ItemInterface::class);
+        $passwordMenuItem = $this->createMock(ItemInterface::class);
+
+        // 模拟LinkGenerator行为
+        $this->linkGenerator->expects($this->exactly(2))
+            ->method('getCurdListPage')
+            ->willReturnMap([
+                [BizUser::class, '/admin/bizuser/list'],
+                [PasswordHistory::class, '/admin/passwordhistory/list'],
+            ])
+        ;
+
+        // 用户模块菜单已存在
+        $mainItem->expects($this->exactly(2))
+            ->method('getChild')
+            ->with('用户模块')
+            ->willReturn($userModuleItem)
+        ;
+
+        // 不应该再次创建父菜单
+        $mainItem->expects($this->never())
+            ->method('addChild')
+        ;
+
+        // 添加两个子菜单
+        $userModuleItem->expects($this->exactly(2))
+            ->method('addChild')
+            ->with(self::logicalOr('用户管理', '密码历史记录'))
+            ->willReturnOnConsecutiveCalls($userMenuItem, $passwordMenuItem)
+        ;
+
+        // 设置URI和图标
+        $userMenuItem->expects($this->once())
+            ->method('setUri')
+            ->with('/admin/bizuser/list')
+            ->willReturn($userMenuItem)
+        ;
+
+        $userMenuItem->expects($this->once())
+            ->method('setAttribute')
+            ->with('icon', 'fas fa-users')
+            ->willReturn($userMenuItem)
+        ;
+
+        $passwordMenuItem->expects($this->once())
+            ->method('setUri')
+            ->with('/admin/passwordhistory/list')
+            ->willReturn($passwordMenuItem)
+        ;
+
+        $passwordMenuItem->expects($this->once())
+            ->method('setAttribute')
+            ->with('icon', 'fas fa-key')
+            ->willReturn($passwordMenuItem)
+        ;
+
+        $this->adminMenu->__invoke($mainItem);
     }
 }

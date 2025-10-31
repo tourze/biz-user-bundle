@@ -6,8 +6,6 @@ services:
 
   BizUserBundle\Controller\:
     resource: '../../Controller/'
-  BizUserBundle\DataFixtures\:
-    resource: '../../DataFixtures/'
   BizUserBundle\Repository\:
     resource: '../../Repository/'
   BizUserBundle\Service\:

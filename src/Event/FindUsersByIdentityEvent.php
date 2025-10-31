@@ -11,7 +11,7 @@ class FindUsersByIdentityEvent extends Event
     private string $identity;
 
     /**
-     * @var Collection<UserInterface>
+     * @var Collection<int, UserInterface>
      */
     private Collection $users;
 
@@ -25,11 +25,17 @@ class FindUsersByIdentityEvent extends Event
         $this->identity = $identity;
     }
 
+    /**
+     * @return Collection<int, UserInterface>
+     */
     public function getUsers(): Collection
     {
         return $this->users;
     }
 
+    /**
+     * @param Collection<int, UserInterface> $users
+     */
     public function setUsers(Collection $users): void
     {
         $this->users = $users;

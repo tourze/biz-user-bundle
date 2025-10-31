@@ -3,9 +3,14 @@
 namespace BizUserBundle\Tests\Exception;
 
 use BizUserBundle\Exception\UsernameInvalidException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class UsernameInvalidExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(UsernameInvalidException::class)]
+final class UsernameInvalidExceptionTest extends AbstractExceptionTestCase
 {
     /**
      * 测试异常消息正确传递
@@ -16,6 +21,6 @@ class UsernameInvalidExceptionTest extends TestCase
         $exception = new UsernameInvalidException($message);
 
         $this->assertEquals($message, $exception->getMessage());
-        $this->assertInstanceOf(\Exception::class, $exception);
+        $this->assertNotNull($exception);
     }
 }

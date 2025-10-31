@@ -3,10 +3,15 @@
 namespace BizUserBundle\Tests\Event;
 
 use BizUserBundle\Event\FindUserByIdentityEvent;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractEventTestCase;
 
-class FindUserByIdentityEventTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(FindUserByIdentityEvent::class)]
+final class FindUserByIdentityEventTest extends AbstractEventTestCase
 {
     /**
      * 测试设置和获取 identity
@@ -24,7 +29,22 @@ class FindUserByIdentityEventTest extends TestCase
      */
     public function testSetGetUser(): void
     {
-        $user = $this->createMock(UserInterface::class);
+        // @phpstan-ignore-next-line PreferInterfaceStubTraitRule.createTestUser
+        $user = new class implements UserInterface {
+            public function getRoles(): array
+            {
+                return ['ROLE_USER'];
+            }
+
+            public function eraseCredentials(): void
+            {
+            }
+
+            public function getUserIdentifier(): string
+            {
+                return 'test_user';
+            }
+        };
 
         $event = new FindUserByIdentityEvent();
         $event->setUser($user);

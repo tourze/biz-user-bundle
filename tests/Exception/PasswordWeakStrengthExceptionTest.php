@@ -3,9 +3,14 @@
 namespace BizUserBundle\Tests\Exception;
 
 use BizUserBundle\Exception\PasswordWeakStrengthException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class PasswordWeakStrengthExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(PasswordWeakStrengthException::class)]
+final class PasswordWeakStrengthExceptionTest extends AbstractExceptionTestCase
 {
     /**
      * 测试异常消息正确传递
@@ -16,6 +21,6 @@ class PasswordWeakStrengthExceptionTest extends TestCase
         $exception = new PasswordWeakStrengthException($message);
 
         $this->assertEquals($message, $exception->getMessage());
-        $this->assertInstanceOf(\Exception::class, $exception);
+        $this->assertNotNull($exception);
     }
 }

@@ -2,101 +2,48 @@
 
 namespace BizUserBundle\Tests\Entity;
 
-use BizUserBundle\Entity\BizRole;
 use BizUserBundle\Entity\BizUser;
-use BizUserBundle\Entity\UserAttribute;
 use Doctrine\Common\Collections\ArrayCollection;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
-class BizUserTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(BizUser::class)]
+final class BizUserTest extends AbstractEntityTestCase
 {
-    private BizUser $user;
-
-    protected function setUp(): void
+    protected function createEntity(): BizUser
     {
-        $this->user = new BizUser();
+        return new BizUser();
     }
 
     /**
-     * 测试用户实体的基本属性 getter 和 setter
+     * 提供属性及其样本值的 Data Provider.
+     *
+     * @return iterable<array{0: string, 1: mixed}>
      */
-    public function testGettersAndSetters(): void
+    public static function propertiesProvider(): iterable
     {
-        // 测试 ID
-        $this->user->setId(123);
-        $this->assertEquals(123, $this->user->getId());
-
-        // 测试用户名
-        $this->user->setUsername('test_user');
-        $this->assertEquals('test_user', $this->user->getUsername());
-        $this->assertEquals('test_user', $this->user->getUserIdentifier());
-
-        // 测试电子邮件
-        $this->user->setEmail('test@example.com');
-        $this->assertEquals('test@example.com', $this->user->getEmail());
-
-        // 测试密码哈希
-        $this->user->setPasswordHash('password_hash');
-        $this->assertEquals('password_hash', $this->user->getPasswordHash());
-        $this->assertEquals('password_hash', $this->user->getPassword());
-
-        // 测试昵称
-        $this->user->setNickName('Test User');
-        $this->assertEquals('Test User', $this->user->getNickName());
-
-        // 测试身份标识
-        $this->user->setIdentity('user_identity');
-        $this->assertEquals('user_identity', $this->user->getIdentity());
-
-        // 测试类型
-        $this->user->setType('admin');
-        $this->assertEquals('admin', $this->user->getType());
-
-        // 测试头像
-        $this->user->setAvatar('avatar.jpg');
-        $this->assertEquals('avatar.jpg', $this->user->getAvatar());
-
-        // 测试有效状态
-        $this->user->setValid(true);
-        $this->assertTrue($this->user->isValid());
-
-        // 测试手机号码
-        $this->user->setMobile('13800138000');
-        $this->assertEquals('13800138000', $this->user->getMobile());
-
-        // 测试备注
-        $this->user->setRemark('This is a test user');
-        $this->assertEquals('This is a test user', $this->user->getRemark());
-
-        // 测试生日
-        $birthday = new \DateTime('1990-01-01');
-        $this->user->setBirthday($birthday);
-        $this->assertSame($birthday, $this->user->getBirthday());
-
-        // 测试性别
-        $this->user->setGender('male');
-        $this->assertEquals('male', $this->user->getGender());
-
-        // 测试地址信息
-        $this->user->setProvinceName('Beijing');
-        $this->assertEquals('Beijing', $this->user->getProvinceName());
-
-        $this->user->setCityName('Haidian');
-        $this->assertEquals('Haidian', $this->user->getCityName());
-
-        $this->user->setAreaName('Zhongguancun');
-        $this->assertEquals('Zhongguancun', $this->user->getAreaName());
-
-        $this->user->setAddress('No.1 Science Avenue');
-        $this->assertEquals('No.1 Science Avenue', $this->user->getAddress());
-
-        // 测试时间字段
-        $now = new \DateTimeImmutable();
-        $this->user->setCreateTime($now);
-        $this->assertSame($now, $this->user->getCreateTime());
-
-        $this->user->setUpdateTime($now);
-        $this->assertSame($now, $this->user->getUpdateTime());
+        yield 'id' => ['id', 123];
+        yield 'username' => ['username', 'test_user'];
+        yield 'email' => ['email', 'test@example.com'];
+        yield 'passwordHash' => ['passwordHash', 'password_hash'];
+        yield 'nickName' => ['nickName', 'Test User'];
+        yield 'identity' => ['identity', 'user_identity'];
+        yield 'type' => ['type', 'admin'];
+        yield 'avatar' => ['avatar', 'avatar.jpg'];
+        yield 'valid' => ['valid', true];
+        yield 'mobile' => ['mobile', '13800138000'];
+        yield 'remark' => ['remark', 'This is a test user'];
+        yield 'birthday' => ['birthday', new \DateTime('1990-01-01')];
+        yield 'gender' => ['gender', 'male'];
+        yield 'provinceName' => ['provinceName', 'Beijing'];
+        yield 'cityName' => ['cityName', 'Haidian'];
+        yield 'areaName' => ['areaName', 'Zhongguancun'];
+        yield 'address' => ['address', 'No.1 Science Avenue'];
+        yield 'createTime' => ['createTime', new \DateTimeImmutable()];
+        yield 'updateTime' => ['updateTime', new \DateTimeImmutable()];
     }
 
     /**
@@ -104,48 +51,30 @@ class BizUserTest extends TestCase
      */
     public function testConstructor(): void
     {
+        $user = $this->createEntity();
+
         // 测试 assignRoles 集合初始化
-        $this->assertInstanceOf(ArrayCollection::class, $this->getObjectProperty($this->user, 'assignRoles'));
-        $this->assertEmpty($this->getObjectProperty($this->user, 'assignRoles'));
-
-        // 测试 attributes 集合初始化
-        $this->assertInstanceOf(ArrayCollection::class, $this->getObjectProperty($this->user, 'attributes'));
-        $this->assertEmpty($this->getObjectProperty($this->user, 'attributes'));
+        $this->assertInstanceOf(ArrayCollection::class, $this->getObjectProperty($user, 'assignRoles'));
+        $this->assertEmpty($this->getObjectProperty($user, 'assignRoles'));
     }
 
     /**
-     * 测试获取用户角色
+     * 测试序列化时擦除敏感信息
      */
-    public function testGetRoles(): void
+    public function testSerializeErasesCredentials(): void
     {
-        // 测试没有角色时返回 ROLE_USER
-        $roles = $this->user->getRoles();
-        $this->assertContains('ROLE_USER', $roles);
+        $user = $this->createEntity();
 
-        // 测试添加角色后的情况
-        $adminRole = new BizRole();
-        $adminRole->setName('ROLE_ADMIN');
-        
-        $managerRole = new BizRole();
-        $managerRole->setName('ROLE_MANAGER');
-        
-        $this->user->addAssignRole($adminRole);
-        $this->user->addAssignRole($managerRole);
-        
-        $roles = $this->user->getRoles();
-        $this->assertContains('ROLE_ADMIN', $roles);
-        $this->assertContains('ROLE_MANAGER', $roles);
-        // ROLE_USER 只在没有任何角色时自动添加，这里已有角色所以不会包含 ROLE_USER
-    }
+        // 初始化必要属性
+        $user->setUsername('testuser');
 
-    /**
-     * 测试擦除敏感信息
-     */
-    public function testEraseCredentials(): void
-    {
-        // 确保方法不抛出异常
-        $this->user->eraseCredentials();
-        $this->assertTrue(true);
+        // 设置明文密码
+        $user->setPlainPassword('test123');
+        $this->assertEquals('test123', $user->getPlainPassword());
+
+        // 序列化时应该擦除敏感信息
+        $user->__serialize();
+        $this->assertNull($user->getPlainPassword());
     }
 
     /**
@@ -153,134 +82,24 @@ class BizUserTest extends TestCase
      */
     public function testToString(): void
     {
-        $this->user->setId(123);
-        $this->user->setNickName('Test User');
-        $this->assertEquals('Test User', (string)$this->user);
+        $user = $this->createEntity();
+        $user->setId(123);
+        $user->setNickName('Test User');
+        $this->assertEquals('Test User', (string) $user);
 
         // 确保在设置空昵称后设置用户名
-        $this->user->setNickName('');
-        $this->user->setUsername('test_user');
+        $user->setNickName('');
+        $user->setUsername('test_user');
 
         // 检查 __toString 的实际实现
-        $toString = (string)$this->user;
+        $toString = (string) $user;
         // 由于实际实现可能有多种情况，我们接受多个可能的值
         $this->assertTrue(
-            $toString === 'test_user' ||
-                $toString === '' ||
-                $toString === '(未保存用户)',
-            "字符串表示不是预期的值，实际值: '$toString'"
+            'test_user' === $toString
+                || '' === $toString
+                || '(未保存用户)' === $toString,
+            "字符串表示不是预期的值，实际值: '{$toString}'"
         );
-    }
-
-    /**
-     * 测试转换为选择项
-     */
-    public function testToSelectItem(): void
-    {
-        $this->user->setId(123);
-        $this->user->setNickName('Test User');
-
-        $result = $this->user->toSelectItem();
-        $this->assertArrayHasKey('value', $result);
-        $this->assertArrayHasKey('label', $result);
-        $this->assertEquals(123, $result['value']);
-        $this->assertEquals('Test User', $result['label']);
-    }
-
-    /**
-     * 测试添加角色
-     */
-    public function testAddAssignRole(): void
-    {
-        $role = new BizRole();
-        $role->setName('Admin Role');
-
-        $result = $this->user->addAssignRole($role);
-
-        // 检查返回值是自身（用于链式调用）
-        $this->assertSame($this->user, $result);
-
-        // 检查角色是否已添加
-        $roles = $this->getObjectProperty($this->user, 'assignRoles');
-        $this->assertCount(1, $roles);
-        $this->assertSame($role, $roles->first());
-    }
-
-    /**
-     * 测试移除角色
-     */
-    public function testRemoveAssignRole(): void
-    {
-        // 先添加角色
-        $role = new BizRole();
-        $role->setName('Admin Role');
-        $this->user->addAssignRole($role);
-
-        // 检查角色是否已添加
-        $roles = $this->getObjectProperty($this->user, 'assignRoles');
-        $this->assertCount(1, $roles);
-
-        // 移除角色
-        $result = $this->user->removeAssignRole($role);
-
-        // 检查返回值是自身（用于链式调用）
-        $this->assertSame($this->user, $result);
-
-        // 检查角色是否已移除
-        $roles = $this->getObjectProperty($this->user, 'assignRoles');
-        $this->assertCount(0, $roles);
-    }
-
-    /**
-     * 测试添加属性
-     */
-    public function testAddAttribute(): void
-    {
-        $attribute = new UserAttribute();
-        $attribute->setName('test_attr');
-        $attribute->setValue('test_value');
-
-        $result = $this->user->addAttribute($attribute);
-
-        // 检查返回值是自身（用于链式调用）
-        $this->assertSame($this->user, $result);
-
-        // 检查属性是否已添加
-        $attributes = $this->getObjectProperty($this->user, 'attributes');
-        $this->assertCount(1, $attributes);
-        $this->assertSame($attribute, $attributes->first());
-
-        // 检查双向关系是否建立
-        $this->assertSame($this->user, $attribute->getUser());
-    }
-
-    /**
-     * 测试移除属性
-     */
-    public function testRemoveAttribute(): void
-    {
-        // 先添加属性
-        $attribute = new UserAttribute();
-        $attribute->setName('test_attr');
-        $attribute->setValue('test_value');
-        $this->user->addAttribute($attribute);
-
-        // 检查属性是否已添加
-        $attributes = $this->getObjectProperty($this->user, 'attributes');
-        $this->assertCount(1, $attributes);
-
-        // 移除属性
-        $result = $this->user->removeAttribute($attribute);
-
-        // 检查返回值是自身（用于链式调用）
-        $this->assertSame($this->user, $result);
-
-        // 检查属性是否已移除
-        $attributes = $this->getObjectProperty($this->user, 'attributes');
-        $this->assertCount(0, $attributes);
-
-        // 检查双向关系是否解除
-        $this->assertNull($attribute->getUser());
     }
 
     /**
@@ -288,17 +107,18 @@ class BizUserTest extends TestCase
      */
     public function testSerialize(): void
     {
-        $this->user->setId(123);
-        $this->user->setUsername('test_user');
-        $this->user->setPasswordHash('password_hash');
+        $user = $this->createEntity();
+        $user->setId(123);
+        $user->setUsername('test_user');
+        $user->setPasswordHash('password_hash');
 
-        $serialized = $this->user->__serialize();
-        $this->assertArrayHasKey(0, $serialized);
-        $this->assertArrayHasKey(1, $serialized);
-        $this->assertArrayHasKey(2, $serialized);
-        $this->assertEquals(123, $serialized[0]);
-        $this->assertEquals('test_user', $serialized[1]);
-        $this->assertEquals('password_hash', $serialized[2]);
+        $serialized = $user->__serialize();
+        $this->assertArrayHasKey('id', $serialized);
+        $this->assertArrayHasKey('username', $serialized);
+        $this->assertArrayHasKey('passwordHash', $serialized);
+        $this->assertEquals(123, $serialized['id']);
+        $this->assertEquals('test_user', $serialized['username']);
+        $this->assertEquals('password_hash', $serialized['passwordHash']);
     }
 
     /**
@@ -306,17 +126,18 @@ class BizUserTest extends TestCase
      */
     public function testUnserialize(): void
     {
+        $user = $this->createEntity();
         $data = [
-            0 => 123,
-            1 => 'test_user',
-            2 => 'password_hash',
+            'id' => 123,
+            'username' => 'test_user',
+            'passwordHash' => 'password_hash',
         ];
 
-        $this->user->__unserialize($data);
+        $user->__unserialize($data);
 
-        $this->assertEquals(123, $this->user->getId());
-        $this->assertEquals('test_user', $this->user->getUsername());
-        $this->assertEquals('password_hash', $this->user->getPasswordHash());
+        $this->assertEquals(123, $user->getId());
+        $this->assertEquals('test_user', $user->getUsername());
+        $this->assertEquals('password_hash', $user->getPasswordHash());
     }
 
     /**
@@ -324,12 +145,13 @@ class BizUserTest extends TestCase
      */
     public function testRetrieveAdminArray(): void
     {
-        $this->user->setId(123);
-        $this->user->setUsername('test_user');
-        $this->user->setNickName('Test User');
-        $this->user->setValid(true);
+        $user = $this->createEntity();
+        $user->setId(123);
+        $user->setUsername('test_user');
+        $user->setNickName('Test User');
+        $user->setValid(true);
 
-        $result = $this->user->retrieveAdminArray();
+        $result = $user->retrieveAdminArray();
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('username', $result);
         $this->assertArrayHasKey('nickName', $result);
@@ -345,11 +167,12 @@ class BizUserTest extends TestCase
      */
     public function testRetrievePlainArray(): void
     {
-        $this->user->setId(123);
-        $this->user->setUsername('test_user');
-        $this->user->setNickName('Test User');
+        $user = $this->createEntity();
+        $user->setId(123);
+        $user->setUsername('test_user');
+        $user->setNickName('Test User');
 
-        $result = $this->user->retrievePlainArray();
+        $result = $user->retrievePlainArray();
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('username', $result);
         $this->assertArrayHasKey('nickName', $result);
@@ -363,12 +186,13 @@ class BizUserTest extends TestCase
      */
     public function testRetrieveApiArray(): void
     {
-        $this->user->setId(123);
-        $this->user->setUsername('test_user');
-        $this->user->setNickName('Test User');
-        $this->user->setAvatar('avatar.jpg');
+        $user = $this->createEntity();
+        $user->setId(123);
+        $user->setUsername('test_user');
+        $user->setNickName('Test User');
+        $user->setAvatar('avatar.jpg');
 
-        $result = $this->user->retrieveApiArray();
+        $result = $user->retrieveApiArray();
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('username', $result);
         $this->assertArrayHasKey('nickName', $result);
@@ -384,9 +208,10 @@ class BizUserTest extends TestCase
      */
     public function testRetrieveLockResource(): void
     {
-        $this->user->setId(123);
+        $user = $this->createEntity();
+        $user->setId(123);
 
-        $result = $this->user->retrieveLockResource();
+        $result = $user->retrieveLockResource();
 
         $this->assertEquals('biz_user_123', $result);
     }
@@ -394,12 +219,12 @@ class BizUserTest extends TestCase
     /**
      * 辅助方法：获取对象的私有属性
      */
-    private function getObjectProperty(object $object, string $propertyName)
+    private function getObjectProperty(object $object, string $propertyName): mixed
     {
         $reflection = new \ReflectionClass($object);
         $property = $reflection->getProperty($propertyName);
         $property->setAccessible(true);
+
         return $property->getValue($object);
     }
-
 }

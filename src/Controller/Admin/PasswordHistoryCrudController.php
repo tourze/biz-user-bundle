@@ -3,6 +3,7 @@
 namespace BizUserBundle\Controller\Admin;
 
 use BizUserBundle\Entity\PasswordHistory;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -19,7 +20,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 /**
  * @extends AbstractCrudController<PasswordHistory>
  */
-class PasswordHistoryCrudController extends AbstractCrudController
+#[AdminCrud(
+    routePath: '/biz-user/password-history',
+    routeName: 'biz_user_password_history'
+)]
+final class PasswordHistoryCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
@@ -35,34 +40,41 @@ class PasswordHistoryCrudController extends AbstractCrudController
             ->setSearchFields(['username', 'userId'])
             ->showEntityActionsInlined()
             ->setPageTitle(Crud::PAGE_INDEX, '密码历史记录')
-            ->setPageTitle(Crud::PAGE_DETAIL, '密码历史详情');
+            ->setPageTitle(Crud::PAGE_DETAIL, '密码历史详情')
+        ;
     }
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id');
-        
+        yield IdField::new('id', 'ID');
+
         yield TextField::new('username', '用户名')
-            ->setColumns(6);
-            
+            ->setColumns(6)
+        ;
+
         yield TextField::new('userId', '用户ID')
-            ->setColumns(6);
-            
+            ->setColumns(6)
+        ;
+
         yield TextField::new('ciphertext', '密码密文')
             ->hideOnIndex()
             ->formatValue(function ($value) {
                 return $value ? '***已加密***' : '无';
-            });
-            
+            })
+        ;
+
         yield BooleanField::new('needReset', '需要重置')
-            ->renderAsSwitch(false);
-            
+            ->renderAsSwitch(false)
+        ;
+
         yield DateTimeField::new('expireTime', '过期时间')
-            ->hideOnIndex();
-            
+            ->hideOnIndex()
+        ;
+
         yield TextField::new('createdFromIp', '创建IP')
-            ->hideOnIndex();
-            
+            ->hideOnIndex()
+        ;
+
         yield DateTimeField::new('createTime', '创建时间');
     }
 
@@ -73,18 +85,20 @@ class PasswordHistoryCrudController extends AbstractCrudController
             ->add(TextFilter::new('userId', '用户ID'))
             ->add(BooleanFilter::new('needReset', '需要重置'))
             ->add(DateTimeFilter::new('createTime', '创建时间'))
-            ->add(DateTimeFilter::new('expireTime', '过期时间'));
+            ->add(DateTimeFilter::new('expireTime', '过期时间'))
+        ;
     }
 
     public function configureActions(Actions $actions): Actions
     {
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->remove(Crud::PAGE_INDEX, Action::NEW)
-            ->remove(Crud::PAGE_INDEX, Action::EDIT)
-            ->remove(Crud::PAGE_INDEX, Action::DELETE)
+            ->disable(Action::NEW)
+            ->disable(Action::EDIT)
+            ->disable(Action::DELETE)
             ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
                 return $action->setIcon('fa fa-eye')->setLabel('详情');
-            });
+            })
+        ;
     }
 }

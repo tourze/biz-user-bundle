@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BizUserBundle\Entity;
 
 use BizUserBundle\Repository\BizUserRepository;
@@ -14,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\Arrayable\AdminArrayInterface;
 use Tourze\Arrayable\ApiArrayInterface;
 use Tourze\Arrayable\PlainArrayInterface;
+use Tourze\BizRoleBundle\Entity\BizRole;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
@@ -24,6 +27,9 @@ use Tourze\LockServiceBundle\Model\LockEntity;
  * @see https://symfony.com/doc/current/doctrine.html#creating-an-entity-class
  * @see https://symfony.com/doc/current/doctrine/reverse_engineering.html
  * @see https://docs.kilvn.com/skr-shop/src/account/#%E7%94%A8%E6%88%B7%E4%BD%93%E7%B3%BB
+ * @implements AdminArrayInterface<string, mixed>
+ * @implements PlainArrayInterface<string, mixed>
+ * @implements ApiArrayInterface<string, mixed>
  */
 #[ORM\Entity(repositoryClass: BizUserRepository::class)]
 #[ORM\Table(name: BizUser::TABLE_NAME, options: ['comment' => '系统用户'])]
@@ -40,10 +46,12 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     #[Groups(groups: ['restful_read'])]
     #[TrackColumn]
+    #[Assert\Length(max: 255)]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '头像'])]
     private ?string $avatar = null;
 
     #[IndexColumn]
+    #[Assert\Length(max: 60)]
     #[ORM\Column(type: Types::STRING, length: 60, nullable: true, options: ['comment' => '用户类型'])]
     private ?string $type = null;
 
@@ -58,93 +66,108 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     #[IndexColumn]
     #[TrackColumn]
+    #[Assert\Length(max: 64)]
     #[ORM\Column(type: Types::STRING, length: 64, nullable: true, options: ['comment' => '用户唯一标志'])]
     private ?string $identity = null;
 
     #[Groups(groups: ['restful_read'])]
     #[TrackColumn]
-    #[Assert\NotBlank]
+    #[Assert\Length(max: 191)]
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '昵称'])]
-    private string $nickName = '';
+    private ?string $nickName = null;
 
     #[Assert\Email]
-    #[ORM\Column(type: Types::STRING, length: 500, nullable: true, options: ['comment' => '邮箱地址'])]
+    #[Assert\Length(max: 191)]
+    #[ORM\Column(type: Types::STRING, length: 191, nullable: true, options: ['comment' => '邮箱地址'])]
     private ?string $email = null;
 
     #[TrackColumn]
-    #[ORM\Column(length: 255, nullable: true, options: ['comment' => '手机号码'])]
+    #[Assert\Length(max: 190)]
+    #[Assert\Regex(pattern: '/^1[3-9]\d{9}$/', message: '手机号码格式不正确')]
+    #[ORM\Column(length: 190, nullable: true, options: ['comment' => '手机号码'])]
     private ?string $mobile = null;
 
+    #[Assert\Length(max: 255)]
     #[ORM\Column(type: Types::STRING, nullable: true, options: ['comment' => '密码HASH'])]
     private ?string $passwordHash = null;
 
     /**
      * 临时存储明文密码，用于表单处理，不持久化到数据库
      */
+    #[Assert\Length(max: 255)]
     private ?string $plainPassword = null;
 
     /**
-     * @var Collection<BizRole>
+     * @var Collection<int, BizRole>
      */
     #[ORM\ManyToMany(targetEntity: BizRole::class, inversedBy: 'users', cascade: ['persist'], fetch: 'EXTRA_LAZY')]
+    #[ORM\JoinTable(name: 'biz_user_biz_role')]
     private Collection $assignRoles;
 
-    /**
-     * @var Collection<UserAttribute>
-     */
-    #[Groups(groups: ['restful_read'])]
-    #[ORM\OneToMany(targetEntity: UserAttribute::class, mappedBy: 'user', cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true, indexBy: 'name')]
-    private Collection $attributes;
-
     #[TrackColumn]
+    #[Assert\Length(max: 65535)]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
 
+    #[Assert\Date]
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true, options: ['comment' => '生日'])]
     private ?\DateTimeInterface $birthday = null;
 
+    #[Assert\Length(max: 20)]
     #[ORM\Column(length: 20, nullable: true, options: ['comment' => '性别'])]
     private ?string $gender = null;
 
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => '省份名称'])]
     private ?string $provinceName = null;
 
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => '城市名称'])]
     private ?string $cityName = null;
 
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => '区域名称'])]
     private ?string $areaName = null;
 
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '详细地址'])]
     private ?string $address = null;
 
     #[IndexColumn]
     #[TrackColumn]
     #[Groups(groups: ['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
+    #[Assert\Type(type: 'bool')]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
     public function __construct()
     {
         $this->assignRoles = new ArrayCollection();
-        $this->attributes = new ArrayCollection();
     }
 
     public function __serialize(): array
     {
+        // 清除敏感信息
+        $this->plainPassword = null;
+
         // add $this->salt too if you don't use Bcrypt or Argon2i
-        return [$this->id, $this->username, $this->passwordHash];
+        return ['id' => $this->id, 'username' => $this->username, 'passwordHash' => $this->passwordHash];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function __unserialize(array $data): void
     {
         // add $this->salt too if you don't use Bcrypt or Argon2i
-        [$this->id, $this->username, $this->passwordHash] = $data;
+        $this->id = $data['id'];
+        $this->username = $data['username'];
+        $this->passwordHash = $data['passwordHash'];
     }
 
     public function __toString(): string
     {
-        if ($this->getId() === null) {
+        if (null === $this->getId()) {
             return '(未保存用户)';
         }
 
@@ -166,14 +189,12 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->valid;
     }
 
-    public function setValid(?bool $valid): self
+    public function setValid(?bool $valid): void
     {
         $this->valid = $valid;
-
-        return $this;
     }
 
-    public function setNickName(string $nickName): void
+    public function setNickName(?string $nickName): void
     {
         $this->nickName = $nickName;
     }
@@ -185,6 +206,11 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
 
     public function getUserIdentifier(): string
     {
+        // 在创建新用户时，username 可能为空，返回默认值而不是抛出异常
+        if ('' === $this->username) {
+            return null !== $this->id ? (string) $this->id : '0';
+        }
+
         return $this->username;
     }
 
@@ -228,34 +254,80 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->plainPassword;
     }
 
-    public function setPlainPassword(?string $plainPassword): self
+    public function setPlainPassword(?string $plainPassword): void
     {
         $this->plainPassword = $plainPassword;
-        return $this;
     }
 
     public function getRoles(): array
     {
+        $roles = $this->collectUserRoles();
+        $roles = $this->ensureDefaultRole($roles);
+
+        return array_values(array_unique($roles));
+    }
+
+    /**
+     * 收集用户角色
+     *
+     * @return string[]
+     */
+    private function collectUserRoles(): array
+    {
         $roles = [];
         foreach ($this->getAssignRoles() as $assignRole) {
             $roles[] = $assignRole->getName();
-            foreach ($assignRole->getHierarchicalRoles() as $hierarchicalRole) {
-                if (is_array($hierarchicalRole)) {
-                    $roles[] = implode(',', $hierarchicalRole);
-                } elseif ($hierarchicalRole instanceof BizRole) {
-                    $roles[] = $hierarchicalRole->getName();
-                } else {
-                    $roles[] = strval($hierarchicalRole);
-                }
-            }
+            $roles = array_merge($roles, $this->processHierarchicalRoles($assignRole));
         }
 
-        // guarantees that a user always has at least one role for security
+        return $roles;
+    }
+
+    /**
+     * 处理层次化角色
+     *
+     * @return string[]
+     */
+    private function processHierarchicalRoles(BizRole $assignRole): array
+    {
+        $roles = [];
+        foreach ($assignRole->getHierarchicalRoles() as $hierarchicalRole) {
+            $roles[] = $this->convertRoleToString($hierarchicalRole);
+        }
+
+        return $roles;
+    }
+
+    /**
+     * 转换角色为字符串
+     */
+    private function convertRoleToString(mixed $role): string
+    {
+        if (is_array($role)) {
+            return implode(',', $role);
+        }
+
+        if ($role instanceof BizRole) {
+            return $role->getName();
+        }
+
+        return strval($role);
+    }
+
+    /**
+     * 确保默认角色
+     *
+     * @param string[] $roles
+     *
+     * @return string[]
+     */
+    private function ensureDefaultRole(array $roles): array
+    {
         if ([] === $roles) {
             $roles[] = 'ROLE_USER';
         }
 
-        return array_values(array_unique($roles));
+        return $roles;
     }
 
     public function getSalt(): ?string
@@ -280,11 +352,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->avatar;
     }
 
-    public function setAvatar(?string $avatar): self
+    public function setAvatar(?string $avatar): void
     {
         $this->avatar = $avatar;
-
-        return $this;
     }
 
     public function getIdentity(): ?string
@@ -292,11 +362,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->identity;
     }
 
-    public function setIdentity(?string $identity): self
+    public function setIdentity(?string $identity): void
     {
         $this->identity = $identity;
-
-        return $this;
     }
 
     public function getType(): ?string
@@ -304,13 +372,14 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->type;
     }
 
-    public function setType(?string $type): self
+    public function setType(?string $type): void
     {
         $this->type = $type;
-
-        return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toSelectItem(): array
     {
         return [
@@ -324,19 +393,20 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     /**
      * 获取当前有效的角色列表
      *
-     * @return array|BizRole[]
+     * @return BizRole[]
      */
     public function getAssignRoles(): array
     {
         return $this->assignRoles
-            ->filter(fn (BizRole $item) => $item->isValid())
-            ->toArray();
+            ->filter(fn (BizRole $item): bool => true === $item->isValid())
+            ->toArray()
+        ;
     }
 
     public function addAssignRole(BizRole $assignRole): self
     {
         if (!$this->assignRoles->contains($assignRole)) {
-            $this->assignRoles[] = $assignRole;
+            $this->assignRoles->add($assignRole);
         }
 
         return $this;
@@ -349,44 +419,14 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this;
     }
 
-    /**
-     * @return Collection<int, UserAttribute>
-     */
-    public function getAttributes(): Collection
-    {
-        return $this->attributes;
-    }
-
-    public function addAttribute(UserAttribute $attribute): self
-    {
-        if (!$this->attributes->contains($attribute)) {
-            $this->attributes[] = $attribute;
-            $attribute->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAttribute(UserAttribute $attribute): self
-    {
-        // set the owning side to null (unless already changed)
-        if ($this->attributes->removeElement($attribute) && $attribute->getUser() === $this) {
-            $attribute->setUser(null);
-        }
-
-        return $this;
-    }
-
     public function getRemark(): ?string
     {
         return $this->remark;
     }
 
-    public function setRemark(?string $remark): self
+    public function setRemark(?string $remark): void
     {
         $this->remark = $remark;
-
-        return $this;
     }
 
     public function getBirthday(): ?\DateTimeInterface
@@ -394,11 +434,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->birthday;
     }
 
-    public function setBirthday(?\DateTimeInterface $birthday): self
+    public function setBirthday(?\DateTimeInterface $birthday): void
     {
         $this->birthday = $birthday;
-
-        return $this;
     }
 
     public function getGender(): ?string
@@ -406,11 +444,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->gender;
     }
 
-    public function setGender(?string $gender): self
+    public function setGender(?string $gender): void
     {
         $this->gender = $gender;
-
-        return $this;
     }
 
     public function getProvinceName(): ?string
@@ -418,11 +454,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->provinceName;
     }
 
-    public function setProvinceName(string $provinceName): self
+    public function setProvinceName(string $provinceName): void
     {
         $this->provinceName = $provinceName;
-
-        return $this;
     }
 
     public function getCityName(): ?string
@@ -430,11 +464,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->cityName;
     }
 
-    public function setCityName(?string $cityName): self
+    public function setCityName(?string $cityName): void
     {
         $this->cityName = $cityName;
-
-        return $this;
     }
 
     public function getAreaName(): ?string
@@ -442,11 +474,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->areaName;
     }
 
-    public function setAreaName(?string $areaName): self
+    public function setAreaName(?string $areaName): void
     {
         $this->areaName = $areaName;
-
-        return $this;
     }
 
     public function getAddress(): ?string
@@ -454,11 +484,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->address;
     }
 
-    public function setAddress(?string $address): self
+    public function setAddress(?string $address): void
     {
         $this->address = $address;
-
-        return $this;
     }
 
     public function getMobile(): ?string
@@ -466,13 +494,14 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $this->mobile;
     }
 
-    public function setMobile(?string $mobile): self
+    public function setMobile(?string $mobile): void
     {
         $this->mobile = $mobile;
-
-        return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrieveAdminArray(): array
     {
         $result = [
@@ -487,6 +516,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         return $result;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrievePlainArray(): array
     {
         return [
@@ -502,9 +534,12 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function retrieveApiArray(): array
     {
-        $result = [
+        return [
             'id' => $this->getId(),
             'avatar' => $this->getAvatar(),
             'username' => $this->getUsername(),
@@ -512,14 +547,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
             'nickName' => $this->getNickName(),
             'email' => $this->getEmail(),
             'mobile' => $this->getMobile(),
-            'attributes' => [],
         ];
-
-        foreach ($this->getAttributes() as $attribute) {
-            $result['attributes'][] = $attribute->retrieveApiArray();
-        }
-
-        return $result;
     }
 
     public function retrieveLockResource(): string

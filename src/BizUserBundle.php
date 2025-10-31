@@ -3,10 +3,12 @@
 namespace BizUserBundle;
 
 use BizUserBundle\Entity\BizUser;
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Tourze\BizRoleBundle\BizRoleBundle;
 use Tourze\BundleDependency\BundleDependencyInterface;
 use Tourze\DoctrineIpBundle\DoctrineIpBundle;
 use Tourze\DoctrineResolveTargetEntityBundle\DependencyInjection\Compiler\ResolveTargetEntityPass;
@@ -15,6 +17,7 @@ use Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle;
 use Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle;
 use Tourze\DoctrineTrackBundle\DoctrineTrackBundle;
 use Tourze\DoctrineUserBundle\DoctrineUserBundle;
+use Tourze\FileStorageBundle\FileStorageBundle;
 
 class BizUserBundle extends Bundle implements BundleDependencyInterface
 {
@@ -35,12 +38,15 @@ class BizUserBundle extends Bundle implements BundleDependencyInterface
     public static function getBundleDependencies(): array
     {
         return [
+            BizRoleBundle::class => ['all' => true],
+            DoctrineBundle::class => ['all' => true],
             DoctrineResolveTargetEntityBundle::class => ['all' => true],
             DoctrineTimestampBundle::class => ['all' => true],
             DoctrineSnowflakeBundle::class => ['all' => true],
             DoctrineIpBundle::class => ['all' => true],
             DoctrineTrackBundle::class => ['all' => true],
             DoctrineUserBundle::class => ['all' => true],
+            FileStorageBundle::class => ['all' => true],
         ];
     }
 }

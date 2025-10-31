@@ -2,12 +2,17 @@
 
 namespace BizUserBundle\Tests\Event;
 
-use BizUserBundle\Entity\BizUser;
 use BizUserBundle\Event\FindUsersByIdentityEvent;
 use Doctrine\Common\Collections\ArrayCollection;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractEventTestCase;
 
-class FindUsersByIdentityEventTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(FindUsersByIdentityEvent::class)]
+final class FindUsersByIdentityEventTest extends AbstractEventTestCase
 {
     /**
      * 测试设置和获取 identity
@@ -25,12 +30,41 @@ class FindUsersByIdentityEventTest extends TestCase
      */
     public function testSetGetUsers(): void
     {
-        $user1 = new BizUser();
-        $user1->setUsername('user1');
+        // @phpstan-ignore-next-line PreferInterfaceStubTraitRule.createTestUser
+        $user1 = new class implements UserInterface {
+            public function getRoles(): array
+            {
+                return ['ROLE_USER'];
+            }
 
-        $user2 = new BizUser();
-        $user2->setUsername('user2');
+            public function eraseCredentials(): void
+            {
+            }
 
+            public function getUserIdentifier(): string
+            {
+                return 'test_user_1';
+            }
+        };
+
+        // @phpstan-ignore-next-line PreferInterfaceStubTraitRule.createTestUser
+        $user2 = new class implements UserInterface {
+            public function getRoles(): array
+            {
+                return ['ROLE_ADMIN'];
+            }
+
+            public function eraseCredentials(): void
+            {
+            }
+
+            public function getUserIdentifier(): string
+            {
+                return 'test_user_2';
+            }
+        };
+
+        /** @var ArrayCollection<int, UserInterface> $users */
         $users = new ArrayCollection([$user1, $user2]);
 
         $event = new FindUsersByIdentityEvent();

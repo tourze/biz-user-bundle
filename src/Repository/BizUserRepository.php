@@ -5,7 +5,6 @@ namespace BizUserBundle\Repository;
 use BizUserBundle\Entity\BizUser;
 use BizUserBundle\Exception\UsernameInvalidException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
@@ -14,26 +13,19 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 use Tourze\UserServiceContracts\UserManagerInterface;
 
 /**
- * This custom Doctrine repository is empty because so far we don't need any custom
- * method to query for application user information. But it's always a good practice
- * to define a custom repository that will be used when the application grows.
+ * 业务用户仓储类，负责用户数据的查询操作
+ * 同时实现了用户加载接口和密码升级接口
  *
- * See https://symfony.com/doc/current/doctrine.html#querying-for-objects-the-repository
- *
- * @author Ryan Weaver <weaverryan@gmail.com>
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- *
- * @method BizUser|null find($id, $lockMode = null, $lockVersion = null)
- * @method BizUser|null findOneBy(array $criteria, array $orderBy = null)
- * @method BizUser[]    findAll()
- * @method BizUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<BizUser>
  */
 #[Autoconfigure(public: true)]
 #[AsAlias(id: UserLoaderInterface::class)]
 #[AsAlias(id: UserManagerInterface::class)]
+#[AsRepository(entityClass: BizUser::class)]
 class BizUserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface, UserManagerInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -63,7 +55,7 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
                 'valid' => true,
             ]);
         }
-        if ($user === null) {
+        if (null === $user) {
             $user = $this->findOneBy([
                 'username' => $identifier,
                 'valid' => true,
@@ -75,6 +67,8 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
 
     /**
      * 需要保留的系统用户名关键词
+     *
+     * @return string[]
      */
     public function getReservedUserNames(): array
     {
@@ -102,21 +96,75 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
         }
     }
 
-    public function em(): EntityManagerInterface
+    /**
+     * 保存业务用户实体到数据库
+     */
+    public function save(BizUser $entity, bool $flush = true): void
     {
-        return $this->getEntityManager();
+        $this->getEntityManager()->persist($entity);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
+     * 从数据库中移除业务用户实体
+     */
+    public function remove(BizUser $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
+     * 搜索用户（用于自动完成等场景）
+     *
+     * @return array<array{id: mixed, text: string}>
+     */
+    public function searchUsers(string $query, int $limit = 20): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->select('u.id', 'u.username', 'u.nickName')
+            ->where('u.valid = :valid')
+            ->andWhere('u.username LIKE :query OR u.nickName LIKE :query')
+            ->setParameter('valid', true)
+            ->setParameter('query', '%' . $query . '%')
+            ->setMaxResults($limit)
+        ;
+
+        $results = $qb->getQuery()->getArrayResult();
+
+        return array_map(static function (array $user): array {
+            return [
+                'id' => $user['id'],
+                'text' => $user['nickName'] ?? $user['username'],
+            ];
+        }, $results);
     }
 
     public function createUser(string $userIdentifier, ?string $nickName = null, ?string $avatarUrl = null): UserInterface
     {
         $user = new BizUser();
         $user->setUsername($userIdentifier);
-        if ($nickName !== null) {
+        if (null !== $nickName) {
             $user->setNickName($nickName);
         }
-        if ($avatarUrl !== null) {
+        if (null !== $avatarUrl) {
             $user->setAvatar($avatarUrl);
         }
+        $user->setValid(true);
+
         return $user;
+    }
+
+    public function saveUser(UserInterface $user): void
+    {
+        if (!$user instanceof BizUser) {
+            throw new UnsupportedUserException(sprintf('用户类 %s 不支持。', get_class($user)));
+        }
+
+        $this->save($user, true);
     }
 }

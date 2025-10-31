@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BizUserBundle\Entity;
 
 use BizUserBundle\Repository\PasswordHistoryRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
+use Tourze\DoctrineIpBundle\Traits\CreatedFromIpAware;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
 
@@ -18,38 +21,34 @@ use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
 class PasswordHistory implements \Stringable
 {
     use CreateTimeAware;
+    use CreatedFromIpAware;
     use SnowflakeKeyAware;
 
+    #[Assert\Length(max: 130)]
     #[ORM\Column(length: 130, nullable: true, options: ['comment' => '密码'])]
     private ?string $ciphertext = null;
 
+    #[Assert\Type(type: 'DateTimeImmutable')]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '过期时间'])]
     private ?\DateTimeImmutable $expireTime = null;
 
-    #[ORM\Column(nullable: true, options: ['comment' => '是否需要重置'])]
-    private ?bool $needReset = null;
-
     #[IndexColumn]
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => '用户名'])]
     private ?string $username = null;
 
     #[IndexColumn]
+    #[Assert\Length(max: 191)]
     #[ORM\Column(nullable: true, options: ['comment' => '用户ID'])]
     private ?string $userId = null;
 
-    #[CreateIpColumn]
-    #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
-    private ?string $createdFromIp = null;
-
-    public function __construct(bool $needReset = false)
-    {
-        $this->needReset = $needReset;
-    }
-
+    #[Assert\Type(type: 'bool')]
+    #[ORM\Column(nullable: true, options: ['comment' => '是否需要重置'])]
+    private bool $needReset = false;
 
     public function __toString(): string
     {
-        if ($this->getId() === null) {
+        if (null === $this->getId()) {
             return '';
         }
 
@@ -61,11 +60,9 @@ class PasswordHistory implements \Stringable
         return $this->ciphertext;
     }
 
-    public function setCiphertext(?string $ciphertext): static
+    public function setCiphertext(?string $ciphertext): void
     {
         $this->ciphertext = $ciphertext;
-
-        return $this;
     }
 
     public function getExpireTime(): ?\DateTimeImmutable
@@ -73,16 +70,19 @@ class PasswordHistory implements \Stringable
         return $this->expireTime;
     }
 
-    public function setExpireTime(?\DateTimeImmutable $expireTime): static
+    public function setExpireTime(?\DateTimeImmutable $expireTime): void
     {
         $this->expireTime = $expireTime;
-
-        return $this;
     }
 
-    public function isNeedReset(): ?bool
+    public function isNeedReset(): bool
     {
         return $this->needReset;
+    }
+
+    public function setNeedReset(bool $needReset): void
+    {
+        $this->needReset = $needReset;
     }
 
     public function getUsername(): ?string
@@ -90,11 +90,9 @@ class PasswordHistory implements \Stringable
         return $this->username;
     }
 
-    public function setUsername(string $username): static
+    public function setUsername(string $username): void
     {
         $this->username = $username;
-
-        return $this;
     }
 
     public function getUserId(): ?string
@@ -102,20 +100,8 @@ class PasswordHistory implements \Stringable
         return $this->userId;
     }
 
-    public function setUserId(?string $userId): static
+    public function setUserId(?string $userId): void
     {
         $this->userId = $userId;
-
-        return $this;
-    }
-
-    public function getCreatedFromIp(): ?string
-    {
-        return $this->createdFromIp;
-    }
-
-    public function setCreatedFromIp(?string $createdFromIp): void
-    {
-        $this->createdFromIp = $createdFromIp;
     }
 }

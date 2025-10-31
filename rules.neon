@@ -1,0 +1,9 @@
+parameters:
+    ignoreErrors:
+        # 忽略 Phone 约束在业务用户相关类中的使用 - 业务需要验证用户手机号格式
+        -
+            message: '#在实体和 DTO 中应该使用 \#\[Phone\] 属性代替 Phone 约束#'
+            paths:
+                - src/Entity/BizUser.php
+                - src/Dto/UserRegistrationDto.php
+                - src/Dto/UserProfileDto.php

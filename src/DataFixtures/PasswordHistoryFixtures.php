@@ -11,6 +11,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Tourze\UserServiceContracts\UserServiceConstants;
 
@@ -19,6 +20,8 @@ use Tourze\UserServiceContracts\UserServiceConstants;
  *
  * 为系统用户创建密码修改历史记录，用于演示密码安全策略
  */
+#[When(env: 'test')]
+#[When(env: 'dev')]
 class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, DependentFixtureInterface
 {
     // 密码历史引用常量
@@ -28,7 +31,8 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
-    ) {}
+    ) {
+    }
 
     public static function getGroups(): array
     {
@@ -55,8 +59,8 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
         ], self::MODERATOR_PASSWORD_HISTORY_REFERENCE);
 
         // 为普通用户创建密码历史记录
-        for ($i = 1; $i <= 5; $i++) {
-            $user = $this->getReference(BizUserFixtures::NORMAL_USER_REFERENCE_PREFIX . $i, BizUser::class);
+        for ($i = 1; $i <= 5; ++$i) {
+            $user = $this->getReference(UserServiceConstants::NORMAL_USER_REFERENCE_PREFIX . $i, BizUser::class);
 
             $passwordHistories = [
                 ['password' => "user{$i}pass123!", 'days_ago' => rand(30, 120), 'need_reset' => false],
@@ -66,11 +70,11 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
             $passwordHistories[] = ['password' => "user{$i}pass456@", 'days_ago' => rand(15, 29), 'need_reset' => false];
 
             // 某些用户需要重置密码
-            if ($i === 3) {
+            if (3 === $i) {
                 $passwordHistories[] = ['password' => "temp{$i}pass789#", 'days_ago' => rand(1, 14), 'need_reset' => true];
             }
 
-            $reference = $i === 1 ? self::USER_PASSWORD_HISTORY_REFERENCE : null;
+            $reference = 1 === $i ? self::USER_PASSWORD_HISTORY_REFERENCE : null;
             $this->createPasswordHistoryForUser($manager, $user, $passwordHistories, $reference);
         }
 
@@ -87,7 +91,8 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
         $manager->persist($expiredPasswordHistory);
 
         // 需要重置的密码记录
-        $resetRequiredHistory = new PasswordHistory(true);
+        $resetRequiredHistory = new PasswordHistory();
+        $resetRequiredHistory->setNeedReset(true);
         $resetRequiredHistory->setUsername('reset_user');
         $resetRequiredHistory->setUserId('888888');
         $resetRequiredHistory->setCiphertext($this->passwordHasher->hashPassword(new BizUser(), 'reset456@'));
@@ -111,16 +116,14 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
     /**
      * 为指定用户创建密码历史记录
      *
-     * @param ObjectManager $manager
-     * @param BizUser $user
-     * @param array $passwordData 密码数据数组，每个元素包含 password, days_ago, need_reset
-     * @param string|null $reference 引用名称（可选）
+     * @param array<int, array<string, mixed>> $passwordData 密码数据数组，每个元素包含 password, days_ago, need_reset
+     * @param string|null                      $reference    引用名称（可选）
      */
     private function createPasswordHistoryForUser(
         ObjectManager $manager,
         BizUser $user,
         array $passwordData,
-        ?string $reference = null
+        ?string $reference = null,
     ): void {
         $ips = [
             '192.168.1.10',
@@ -128,11 +131,12 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
             '10.0.0.100',
             '172.16.0.50',
             '203.208.60.100',
-            '114.114.114.114'
+            '114.114.114.114',
         ];
 
         foreach ($passwordData as $index => $data) {
-            $passwordHistory = new PasswordHistory($data['need_reset'] ?? false);
+            $passwordHistory = new PasswordHistory();
+            $passwordHistory->setNeedReset($data['need_reset'] ?? false);
             $passwordHistory->setUsername($user->getUsername());
             $passwordHistory->setUserId((string) $user->getId());
             $passwordHistory->setCiphertext($this->passwordHasher->hashPassword($user, $data['password']));
@@ -141,7 +145,7 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
             $passwordHistory->setCreateTime($createTime);
 
             // 设置过期时间（90天后过期）
-            if (!$data['need_reset']) {
+            if (false === $data['need_reset']) {
                 $passwordHistory->setExpireTime($createTime->modify('+90 days'));
             } else {
                 // 需要重置的密码设置较短的有效期
@@ -154,7 +158,7 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
             $manager->persist($passwordHistory);
 
             // 为第一个记录添加引用
-            if ($index === 0 && $reference !== null) {
+            if (0 === $index && null !== $reference) {
                 $this->addReference($reference, $passwordHistory);
             }
         }
