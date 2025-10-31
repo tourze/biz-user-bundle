@@ -34,8 +34,7 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
         ManagerRegistry $registry,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly BizRoleRepository $roleRepository,
-    )
-    {
+    ) {
         parent::__construct($registry, BizUser::class);
     }
 
