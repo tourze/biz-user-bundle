@@ -49,7 +49,7 @@
     "tourze/doctrine-user-bundle": "1.0.*",
     "tourze/easy-admin-menu-bundle": "1.0.*",
     "tourze/enum-extra": "1.*",
-    "tourze/file-storage-bundle": "0.0.*",
+    "tourze/file-storage-bundle": "1.0.*",
     "tourze/lock-service-bundle": "1.0.*",
     "tourze/user-attribute-bundle": "0.0.*",
     "tourze/user-service-contracts": "1.*"
