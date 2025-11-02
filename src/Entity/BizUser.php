@@ -42,7 +42,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
-    private ?int $id = 0;
+    private ?int $id = null;
 
     #[Groups(groups: ['restful_read'])]
     #[TrackColumn]
@@ -160,9 +160,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     public function __unserialize(array $data): void
     {
         // add $this->salt too if you don't use Bcrypt or Argon2i
-        $this->id = $data['id'];
-        $this->username = $data['username'];
-        $this->passwordHash = $data['passwordHash'];
+        $this->id = isset($data['id']) && is_numeric($data['id']) ? (int) $data['id'] : null;
+        $this->username = isset($data['username']) && is_string($data['username']) ? $data['username'] : '';
+        $this->passwordHash = isset($data['passwordHash']) && is_string($data['passwordHash']) ? $data['passwordHash'] : null;
     }
 
     public function __toString(): string
@@ -207,7 +207,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
     public function getUserIdentifier(): string
     {
         // 在创建新用户时，username 可能为空，返回默认值而不是抛出异常
-        if ('' === $this->username) {
+        if (!isset($this->username) || '' === $this->username) {
             return null !== $this->id ? (string) $this->id : '0';
         }
 
@@ -311,7 +311,7 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
             return $role->getName();
         }
 
-        return strval($role);
+        return is_scalar($role) ? (string) $role : '';
     }
 
     /**
@@ -510,7 +510,9 @@ class BizUser implements UserInterface, PasswordAuthenticatedUserInterface, Item
         ];
 
         foreach ($this->getAssignRoles() as $assignRole) {
-            $result['roles'][] = $assignRole->retrievePlainArray();
+            if (isset($result['roles']) && is_array($result['roles'])) {
+                $result['roles'][] = $assignRole->retrievePlainArray();
+            }
         }
 
         return $result;

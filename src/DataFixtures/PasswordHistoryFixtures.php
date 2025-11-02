@@ -136,16 +136,19 @@ class PasswordHistoryFixtures extends Fixture implements FixtureGroupInterface, 
 
         foreach ($passwordData as $index => $data) {
             $passwordHistory = new PasswordHistory();
-            $passwordHistory->setNeedReset($data['need_reset'] ?? false);
+            $needReset = (bool) ($data['need_reset'] ?? false);
+            $passwordHistory->setNeedReset($needReset);
             $passwordHistory->setUsername($user->getUsername());
             $passwordHistory->setUserId((string) $user->getId());
-            $passwordHistory->setCiphertext($this->passwordHasher->hashPassword($user, $data['password']));
+            $password = isset($data['password']) && is_string($data['password']) ? $data['password'] : '';
+            $passwordHistory->setCiphertext($this->passwordHasher->hashPassword($user, $password));
 
-            $createTime = CarbonImmutable::now()->modify('-' . $data['days_ago'] . ' days');
+            $daysAgo = isset($data['days_ago']) && is_numeric($data['days_ago']) ? (int) $data['days_ago'] : 0;
+            $createTime = CarbonImmutable::now()->modify(sprintf('-%d days', $daysAgo));
             $passwordHistory->setCreateTime($createTime);
 
             // 设置过期时间（90天后过期）
-            if (false === $data['need_reset']) {
+            if (false === $needReset) {
                 $passwordHistory->setExpireTime($createTime->modify('+90 days'));
             } else {
                 // 需要重置的密码设置较短的有效期

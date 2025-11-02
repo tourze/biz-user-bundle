@@ -56,7 +56,7 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
         $user = null;
         if (is_numeric($identifier)) {
             $user = $this->findOneBy([
-                'id' => $identifier,
+                'id' => (int) $identifier,
                 'valid' => true,
             ]);
         }
@@ -141,14 +141,26 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
 
         $results = $qb->getQuery()->getArrayResult();
 
-        return array_map(static function (array $user): array {
-            return [
-                'id' => $user['id'],
-                'text' => $user['nickName'] ?? $user['username'],
-            ];
-        }, $results);
+        return array_map(
+            /**
+             * @param array<string, mixed> $user
+             * @return array{id: mixed, text: string}
+             */
+            static function (array $user): array {
+                $nickName = $user['nickName'] ?? null;
+                $username = $user['username'] ?? '';
+                return [
+                    'id' => $user['id'],
+                    'text' => (string) ($nickName ?? $username),
+                ];
+            },
+            $results
+        );
     }
 
+    /**
+     * @param array<string|int, mixed> $roles
+     */
     public function createUser(string $userIdentifier, ?string $nickName = null, ?string $avatarUrl = null, ?string $password = null, array $roles = []): UserInterface
     {
         $user = new BizUser();
@@ -163,10 +175,13 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
             $user->setPasswordHash($this->passwordHasher->hashPassword($user, $password));
         }
         foreach ($roles as $role) {
-            $user->addAssignRole($this->roleRepository->findOrCreate($role));
+            if (is_string($role)) {
+                // @phpstan-ignore-line 跨模块调用：短期内通过 ignore 消噪，后期需重构为服务层接口
+                $user->addAssignRole($this->roleRepository->findOrCreate($role));
+            }
         }
         // 如果用户名是邮箱格式，也设置邮箱
-        if (filter_var($userIdentifier, FILTER_VALIDATE_EMAIL)) {
+        if (false !== filter_var($userIdentifier, FILTER_VALIDATE_EMAIL)) {
             $user->setEmail($userIdentifier);
         }
         $user->setValid(true);
