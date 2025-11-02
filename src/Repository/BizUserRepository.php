@@ -139,23 +139,19 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
             ->setMaxResults($limit)
         ;
 
+        /** @var list<array{id: mixed, username?: string, nickName?: string}> $results */
         $results = $qb->getQuery()->getArrayResult();
 
-        return array_map(
-            /**
-             * @param array<string, mixed> $user
-             * @return array{id: mixed, text: string}
-             */
-            static function (array $user): array {
-                $nickName = $user['nickName'] ?? null;
-                $username = $user['username'] ?? '';
-                return [
-                    'id' => $user['id'],
-                    'text' => (string) ($nickName ?? $username),
-                ];
-            },
-            $results
-        );
+        $items = [];
+        foreach ($results as $user) {
+            $nickName = $user['nickName'] ?? null;
+            $username = $user['username'] ?? '';
+            $items[] = [
+                'id' => $user['id'],
+                'text' => (string) ($nickName ?? $username),
+            ];
+        }
+        return $items;
     }
 
     /**
@@ -176,7 +172,7 @@ class BizUserRepository extends ServiceEntityRepository implements UserLoaderInt
         }
         foreach ($roles as $role) {
             if (is_string($role)) {
-                // @phpstan-ignore-line 跨模块调用：短期内通过 ignore 消噪，后期需重构为服务层接口
+                // @phpstan-ignore-next-line tourze.crossModule
                 $user->addAssignRole($this->roleRepository->findOrCreate($role));
             }
         }
