@@ -7,3 +7,4 @@ services:
 
   BizUserBundle\DataFixtures\:
     resource: '../../DataFixtures/'
+    tags: ['doctrine.fixture.orm']
