@@ -51,8 +51,8 @@
     "tourze/enum-extra": "1.0.*",
     "tourze/file-storage-bundle": "1.0.*",
     "tourze/lock-service-bundle": "1.0.*",
-    "tourze/user-attribute-bundle": "0.0.*",
-    "tourze/user-service-contracts": "1.*"
+    "tourze/user-attribute-bundle": "1.0.*",
+    "tourze/user-service-contracts": "1.1.*"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.1",
